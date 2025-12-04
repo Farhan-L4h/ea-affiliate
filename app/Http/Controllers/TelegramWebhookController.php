@@ -1,7 +1,5 @@
 <?php
 
-// app/Http/Controllers/TelegramWebhookController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Affiliate;
@@ -31,7 +29,7 @@ class TelegramWebhookController extends Controller
         $firstName  = $from['first_name'] ?? null;
         $lastName   = $from['last_name'] ?? null;
 
-        $fullName = trim(($firstName ?? '') . ' ' . ($lastName ?? '')) ?: null;
+        $fullName = trim(($firstName ?? '') . ' ' . ($lastName ?? ''));
 
         $text = trim($message['text'] ?? '');
 
@@ -42,10 +40,10 @@ class TelegramWebhookController extends Controller
             if ($refCode) {
                 $refCode = strtoupper($refCode);
 
-                // 1. Cari track by telegram_id dulu
+                // 1. cari track by telegram_id dulu
                 $track = ReferralTrack::where('prospect_telegram_id', $telegramId)->first();
 
-                // 2. Kalau belum ada, coba ambil track "klik link" terakhir dengan ref sama
+                // 2. kalau belum ada, coba ambil track klik-link (ref sama, belum ada telegram id)
                 if (! $track) {
                     $track = ReferralTrack::where('ref_code', $refCode)
                         ->whereNull('prospect_telegram_id')
@@ -54,22 +52,22 @@ class TelegramWebhookController extends Controller
                 }
 
                 if (! $track) {
-                    // 3. bener-bener prospek baru
+                    // 3. bener-bener baru, bikin baru
                     $track = ReferralTrack::create([
                         'ref_code'                   => $refCode,
                         'prospect_telegram_id'       => (string) $telegramId,
                         'prospect_telegram_username' => $username,
-                        'prospect_name'              => $fullName,
+                        'prospect_name'              => $fullName ?: null,
                         'status'                     => 'joined_bot',
                     ]);
 
-                    // stat join
                     Affiliate::where('ref_code', $refCode)->increment('total_joins');
                 } else {
-                    // update data & status
+                    // update data + status
+                    $track->ref_code                   = $track->ref_code ?: $refCode;
                     $track->prospect_telegram_id       = (string) $telegramId;
                     $track->prospect_telegram_username = $username ?? $track->prospect_telegram_username;
-                    $track->prospect_name              = $fullName ?? $track->prospect_name;
+                    $track->prospect_name              = $fullName ?: $track->prospect_name;
 
                     if ($track->status !== 'purchased') {
                         $track->status = 'joined_bot';
@@ -77,15 +75,16 @@ class TelegramWebhookController extends Controller
 
                     $track->save();
 
-                    // kalau sebelumnya belum pernah join, naikkan total_joins
-                    // (opsional: kasih flag di DB, tapi untuk simple kita boleh increment saja sekali saja di /start pertama kali)
                     Affiliate::where('ref_code', $refCode)->increment('total_joins');
                 }
 
-                $this->telegram->sendMessage($chatId,
-                    "Halo <b>".($username ?? $fullName ?? 'Trader')."</b> 👋\n\n" .
+                $displayName = $username ?? ($fullName ?: 'Trader');
+
+                $this->telegram->sendMessage(
+                    $chatId,
+                    "Halo <b>{$displayName}</b> 👋\n\n" .
                     "Kamu datang lewat link affiliate: <b>{$refCode}</b>.\n" .
-                    "Progress kamu bakal otomatis dikaitkan ke sponsor pertama ini. 😉"
+                    "Kalau nanti jadi beli EA, komisi otomatis masuk ke sponsor pertama ini. 😉"
                 );
             }
 
@@ -95,4 +94,3 @@ class TelegramWebhookController extends Controller
         return response()->json(['ok' => true]);
     }
 }
-

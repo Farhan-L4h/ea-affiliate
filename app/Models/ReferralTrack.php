@@ -18,5 +18,6 @@ class ReferralTrack extends Model
         'prospect_ip',
         'ref_code',
         'status',
+        'notes', // ⬅️ tambahin ini
     ];
 }
