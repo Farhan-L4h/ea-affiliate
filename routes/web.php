@@ -16,9 +16,9 @@ use App\Http\Controllers\ReferralTrackController;
 
 // ============== PUBLIC + AFFILIATE TRACKER ==============
 Route::middleware(['affiliate.tracker'])->group(function () {
-    // Landing / halaman utama
+    // Landing / halaman utama - redirect ke login
     Route::get('/', function () {
-        return view('welcome');
+        return redirect()->route('login');
     })->name('landing');
 
     // Checkout (prospek / pembelian)
