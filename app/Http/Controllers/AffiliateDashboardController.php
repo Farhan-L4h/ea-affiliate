@@ -37,10 +37,37 @@ class AffiliateDashboardController extends Controller
             ->take(10)
             ->get();
 
-        // DATA PROSPEK UNTUK TABEL
-        $leads = ReferralTrack::where('ref_code', $affiliate->ref_code)
-            ->latest()
-            ->get();
+        // DATA PROSPEK UNTUK TABEL dengan pagination, filter & search
+        $perPage = request()->get('per_page', 10);
+        $query = ReferralTrack::where('ref_code', $affiliate->ref_code);
+
+        // Filter by search (username, email, phone)
+        if (request()->filled('search')) {
+            $search = request('search');
+            $query->where(function($q) use ($search) {
+                $q->where('prospect_telegram_username', 'like', "%{$search}%")
+                  ->orWhere('prospect_name', 'like', "%{$search}%")
+                  ->orWhere('prospect_email', 'like', "%{$search}%")
+                  ->orWhere('prospect_phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if (request()->filled('status')) {
+            $query->where('status', request('status'));
+        }
+
+        // Filter by date range
+        if (request()->filled('date_from')) {
+            $query->whereDate('created_at', '>=', request('date_from'));
+        }
+        if (request()->filled('date_to')) {
+            $query->whereDate('created_at', '<=', request('date_to'));
+        }
+
+        $leads = $query->latest()
+            ->paginate($perPage)
+            ->appends(request()->except('page'));
 
         return view('dashboard', compact(
             'affiliate',
