@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AffiliateDashboardController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\TelegramWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,7 @@ Route::post('/checkout', [CheckoutController::class, 'store'])
 //         ->name('affiliate.dashboard');
 // });
 
+Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle']);
 
 
 require __DIR__.'/auth.php';

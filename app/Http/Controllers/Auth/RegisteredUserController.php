@@ -46,7 +46,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('affiliate.dashboard'); // langsung ke dashboard affiliate
+        return redirect()->route('dashboard'); // langsung ke dashboard affiliate
     }
 
     private function generateAffiliateCode(): string

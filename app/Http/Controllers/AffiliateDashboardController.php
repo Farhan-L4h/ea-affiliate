@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Affiliate;
 use App\Models\AffiliatePayout;
+use App\Models\ReferralTrack;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,36 +14,45 @@ class AffiliateDashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil affiliate user ini (atau bikin kalau belum ada)
         $affiliate = Affiliate::firstOrCreate(
             ['user_id' => $user->id],
             ['ref_code' => $this->generateAffiliateCode()]
         );
 
-        $totalCommission = AffiliatePayout::where('affiliate_ref', $affiliate->ref_code)
-            ->sum('commission');
+        // Hitung berdasarkan referral_tracks
+        $totalClicks = ReferralTrack::where('ref_code', $affiliate->ref_code)->count();
+
+        $totalJoins  = ReferralTrack::where('ref_code', $affiliate->ref_code)
+            ->where('status', 'joined_bot')   // atau whereNotNull('prospect_telegram_id')
+            ->count();
 
         $totalSales = AffiliatePayout::where('affiliate_ref', $affiliate->ref_code)
             ->count();
 
-        $totalClicks = $affiliate->total_clicks;
-        $totalJoins  = $affiliate->total_joins;
+        $totalCommission = AffiliatePayout::where('affiliate_ref', $affiliate->ref_code)
+            ->sum('commission');
 
         $recentSales = Sale::where('affiliate_ref', $affiliate->ref_code)
             ->latest()
             ->take(10)
             ->get();
 
-        // 🟢 Kirim semua ke view "dashboard"
+        // DATA PROSPEK UNTUK TABEL
+        $leads = ReferralTrack::where('ref_code', $affiliate->ref_code)
+            ->latest()
+            ->get();
+
         return view('dashboard', compact(
             'affiliate',
-            'totalCommission',
-            'totalSales',
             'totalClicks',
             'totalJoins',
-            'recentSales'
+            'totalSales',
+            'totalCommission',
+            'recentSales',
+            'leads',
         ));
     }
+
 
     protected function generateAffiliateCode(): string
     {
