@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AffiliateDashboardController;
@@ -14,25 +15,39 @@ use App\Http\Controllers\ReferralTrackController;
 |--------------------------------------------------------------------------
 */
 
-// ============== PUBLIC + AFFILIATE TRACKER ==============
+// ====== PUBLIC + TRACKING (klik link affiliate) ======
 Route::middleware(['affiliate.tracker'])->group(function () {
-    // Landing / halaman utama - redirect ke login
+
+    // Landing (kalau nanti mau ada halaman)
     Route::get('/', function () {
-        return redirect()->route('login');
+        return view('welcome');
     })->name('landing');
 
-    // Checkout (prospek / pembelian)
+    // LINK YANG DIBAGIKAN AFFILIATE
+    Route::get('/r', function (Request $request) {
+        $ref = strtoupper($request->query('ref', ''));
+
+        if ($ref === '') {
+            abort(404);
+        }
+
+        $botUsername = config('services.telegram.username');
+
+        // Setelah middleware jalan (set cookie + log klik),
+        // kita lempar ke bot Telegram bawa kode yang sama
+        return redirect()->away("https://t.me/{$botUsername}?start={$ref}");
+    })->name('redirect.ref');
+
+    // Kalau nanti ada form checkout di web
     Route::post('/checkout', [CheckoutController::class, 'store'])
         ->name('checkout.store');
 });
 
-// ============== AUTH AREA (USER LOGIN) ==============
+// ====== AREA LOGIN (AFFILIATE DASHBOARD) ======
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard Affiliate
     Route::get('/dashboard', [AffiliateDashboardController::class, 'index'])
         ->name('dashboard');
 
-    // Edit profil
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])
@@ -40,12 +55,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 
-    // Update data prospek (modal edit di tabel dashboard)
+    // Update prospek dari modal
     Route::patch('/leads/{lead}', [ReferralTrackController::class, 'update'])
         ->name('leads.update');
 });
 
-// ============== TELEGRAM WEBHOOK (BOT) ==============
+// ====== TELEGRAM WEBHOOK (BOT) ======
 Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle']);
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

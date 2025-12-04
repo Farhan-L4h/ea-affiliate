@@ -12,39 +12,56 @@
 
                     {{-- Referral Info --}}
                     <div class="mb-4">
-                        <p><strong>Referral Code:</strong> {{ $affiliate->ref_code }}</p>
-                        
-                        <div class="flex items-center gap-3 mt-2">
-                            <p class="text-sm text-gray-500 mr-1">
-                                Link Telegram: https://t.me/{{ config('services.telegram.username') }}?start={{ $affiliate->ref_code }}
-                            </p>
-                            <button onclick="copyToClipboard('https://t.me/{{ config('services.telegram.username') }}?start={{ $affiliate->ref_code }}')" class="inline-flex p-2  rounded-md text-gray-500 text-xs font-semibold hover:text-gray-700">
-                                <i class="fa fa-copy"></i>
-                            </button>
-                        </div>
+    <p><strong>Referral Code:</strong> {{ $affiliate->ref_code }}</p>
 
-                        <script>
-                        function copyToClipboard(text) {
-                            navigator.clipboard.writeText(text).then(() => {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: 'Link berhasil dicopy ke clipboard',
-                                    timer: 2000,
-                                    showConfirmButton: false
-                                });
-                            }).catch(err => {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal!',
-                                    text: 'Gagal copy link',
-                                    showConfirmButton: true
-                                });
-                                console.error('Gagal copy:', err);
-                            });
-                        }
-                        </script>
-                    </div>
+    {{-- Link utama yang dibagikan (melewati website dulu) --}}
+    <div class="flex items-center gap-3 mt-2">
+        <p class="text-sm text-gray-500 mr-1">
+            Link Affiliate:
+            <span class="font-mono text-xs">
+                {{ url('/r?ref=' . $affiliate->ref_code) }}
+            </span>
+        </p>
+
+        <button
+            type="button"
+            onclick="copyToClipboard('{{ url('/r?ref=' . $affiliate->ref_code) }}')"
+            class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 text-xs font-semibold hover:text-gray-700 hover:bg-gray-100"
+        >
+            <i class="fa fa-copy text-sm"></i>
+        </button>
+    </div>
+
+    {{-- (Opsional) tetap tampilkan link Telegram langsung kalau mau informasi saja --}}
+    <p class="text-xs text-gray-400 mt-1">
+        Link langsung ke bot:
+        https://t.me/{{ config('services.telegram.username') }}?start={{ $affiliate->ref_code }}
+    </p>
+</div>
+
+{{-- Boleh taruh di bawah file / pakai @push kalau layout mendukung --}}
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Link berhasil dicopy ke clipboard',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }).catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: 'Gagal copy link',
+                showConfirmButton: true
+            });
+            console.error('Gagal copy:', err);
+        });
+    }
+</script>
+
 
 
                     {{-- Stat Cards --}}
