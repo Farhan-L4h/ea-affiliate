@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AffiliateDashboardController;
+use App\Http\Controllers\CheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Checkout
+Route::post('/checkout', [CheckoutController::class, 'store'])
+    ->name('checkout.store');
 
 // Route::middleware(['auth'])->group(function () {
 //     Route::get('/affiliate/dashboard', [AffiliateDashboardController::class, 'index'])

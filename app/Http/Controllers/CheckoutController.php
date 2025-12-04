@@ -2,10 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-namespace App\Http\Controllers;
-
 use App\Models\Sale;
 use App\Models\ReferralTrack;
 use App\Models\Affiliate;
@@ -16,19 +12,19 @@ class CheckoutController extends Controller
 {
     public function store(Request $request)
     {
-        // Validasi minimal
+        // Validasi simple dulu
         $data = $request->validate([
             'name'  => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:120'],
         ]);
 
         $productName = 'EA HabaGridPro';
-        $amount = 1000000; // contoh 1 juta
+        $amount      = 1000000; // 1.000.000, nanti bisa kamu buat dynamic
 
-        // 1. Cari affiliate_ref dari cookie dulu
+        // 1. Cari affiliate_ref dari cookie (first click)
         $affiliateRef = $request->cookie('affiliate_ref');
 
-        // 2. Kalau cookie tidak ada, cek di referral_tracks by email
+        // 2. Kalau cookie kosong, cek referral_tracks by email
         if (! $affiliateRef) {
             $track = ReferralTrack::where('prospect_email', $data['email'])->first();
             if ($track) {
@@ -36,18 +32,18 @@ class CheckoutController extends Controller
             }
         }
 
-        // 3. Simpan referral_tracks (first click wins logic di DB)
+        // 3. Simpan referral_tracks (firstOrCreate = kunci pengundang pertama)
         ReferralTrack::firstOrCreate(
             ['prospect_email' => $data['email']],
             [
-                'ref_code'     => $affiliateRef,
-                'prospect_ip'  => $request->ip(),
+                'ref_code'    => $affiliateRef,
+                'prospect_ip' => $request->ip(),
             ]
         );
 
-        // 4. Simpan penjualan (asumsikan langsung paid, nanti bisa diupdate dari webhook)
+        // 4. Simpan penjualan (sementara langsung 'paid')
         $sale = Sale::create([
-            'user_id'       => null, // kalau ada sistem auth, bisa diisi
+            'user_id'       => null, // nanti bisa dihubungkan ke akun pembeli
             'affiliate_ref' => $affiliateRef,
             'product'       => $productName,
             'amount'        => $amount,
@@ -56,8 +52,8 @@ class CheckoutController extends Controller
 
         // 5. Buat komisi kalau ada affiliate
         if ($affiliateRef) {
-            $commissionRate = 0.30; // 30% misalnya
-            $commission = $amount * $commissionRate;
+            $commissionRate = 0.30; // 30%
+            $commission     = $amount * $commissionRate;
 
             AffiliatePayout::create([
                 'affiliate_ref' => $affiliateRef,
@@ -70,7 +66,7 @@ class CheckoutController extends Controller
             Affiliate::where('ref_code', $affiliateRef)->increment('total_sales');
         }
 
-        return back()->with('success', 'Pembelian tercatat. Nanti tinggal sambung ke payment gateway & pengiriman EA.');
+        return redirect('/')
+            ->with('success', 'Pembelian tercatat. (Masih dummy, nanti kita sambung ke payment gateway)');
     }
 }
-
