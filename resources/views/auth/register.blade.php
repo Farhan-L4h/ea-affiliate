@@ -20,11 +20,9 @@
 
         <!-- Phone -->
         <div class="mt-4">
-            <label for="phone">Nomor HP</label>
-            <input id="phone" name="phone" type="text" value="{{ old('phone') }}" required autocomplete="tel">
-            @error('phone')
-                <div>{{ $message }}</div>
-            @enderror
+            <x-input-label for="phone" :value="__('Phone')" />
+            <x-text-input id="phone" class="block mt-1 w-full" type="number" name="phone" :value="old('phone')" required autocomplete="tel" />
+            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
         </div>
 
 
