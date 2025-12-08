@@ -23,7 +23,7 @@ class AffiliateDashboardController extends Controller
         $totalClicks = ReferralTrack::where('ref_code', $affiliate->ref_code)->count();
 
         $totalJoins  = ReferralTrack::where('ref_code', $affiliate->ref_code)
-            ->where('status', 'joined_bot')   // atau whereNotNull('prospect_telegram_id')
+            ->where('status', 'joined_channel')
             ->count();
 
         $totalSales = AffiliatePayout::where('affiliate_ref', $affiliate->ref_code)

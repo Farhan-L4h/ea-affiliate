@@ -13,7 +13,7 @@ class ReferralTrackController extends Controller
         $validated = $request->validate([
             'prospect_email'  => ['nullable', 'email', 'max:120'],
             'prospect_phone'  => ['nullable', 'string', 'max:30', 'regex:/^[0-9+\-\s()]+$/'],
-            'status'          => ['required', 'in:clicked,joined_bot,purchased'],
+            'status'          => ['required', 'in:clicked,joined_channel,purchased'],
             'notes'           => ['nullable', 'string', 'max:500'],
         ], [
             'prospect_email.email' => 'Format email tidak valid',

@@ -118,7 +118,7 @@
                                 <select name="status" id="status" class="block w-full text-sm rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Semua Status</option>
                                     <option value="clicked" {{ request('status') == 'clicked' ? 'selected' : '' }}>Klik Link</option>
-                                    <option value="joined_bot" {{ request('status') == 'joined_bot' ? 'selected' : '' }}>Join Grub</option>
+                                    <option value="joined_channel" {{ request('status') == 'joined_channel' ? 'selected' : '' }}>Join Chanel</option>
                                     <option value="purchased" {{ request('status') == 'purchased' ? 'selected' : '' }}>Sudah Beli</option>
                                 </select>
                             </div>
@@ -207,23 +207,26 @@
                                                 {{ $lead->prospect_phone ?? '-' }}
                                             </td>
                                             <td class="px-3 py-2 border">
-                                                @switch($lead->status)
-                                                    @case('joined_bot')
-                                                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
-                                                            Join Grub
-                                                        </span>
-                                                        @break
-                                                    @case('purchased')
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800">
-                                                            Sudah Beli
-                                                        </span>
-                                                        @break
-                                                    @default
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
-                                                            Klik Link
-                                                        </span>
-                                                @endswitch
-                                            </td>
+                                               
+    @switch($lead->status)
+        @case('clicked')
+            Klik Link
+            @break
+
+        @case('joined_channel')
+            Join Chanel
+            @break
+
+        @case('purchased')
+            Sudah Beli
+            @break
+
+        @default
+            -
+    @endswitch
+</td>
+
+                                            
                                             <td class="px-3 py-2 border truncate" title="@if ($lead->notes){{ $lead->notes }}@else{{ $lead->prospect_telegram_id ? 'Dari Telegram' : ($lead->prospect_email ? 'Dari Website' : '-') }}@endif">
                                                 @if ($lead->notes)
                                                     {{ Str::limit($lead->notes, 20) }}
@@ -303,12 +306,10 @@
                             <label for="lead_status" class="block text-sm font-medium text-gray-700">Status</label>
                             <select name="status" id="lead_status" class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="clicked">Klik Link</option>
-                                <option value="joined_bot">Join Grub</option>
+                                <option value="joined_channel">Join Chanel</option>
                                 <option value="purchased">Sudah Beli</option>
                             </select>
-                        </div>
-
-                        {{-- Keterangan / Notes --}}
+                        </div>                        {{-- Keterangan / Notes --}}
                         <div>
                             <label for="lead_notes" class="block text-sm font-medium text-gray-700">Keterangan</label>
                             <textarea name="notes" id="lead_notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>

@@ -35,6 +35,7 @@ return [
         'bot_token'  => env('TELEGRAM_BOT_TOKEN'),
         'username'   => env('TELEGRAM_BOT_USERNAME'),
         'webhook_url' => env('TELEGRAM_WEBHOOK_URL'),
+        'group_id'  => env('TELEGRAM_GROUP_ID'),
     ],
 
 ];

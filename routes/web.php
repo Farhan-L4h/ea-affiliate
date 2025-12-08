@@ -3,11 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AffiliateDashboardController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\TelegramWebhookController;
-use App\Http\Controllers\ReferralTrackController;
+use App\Http\Controllers\{
+    ProfileController,
+    AffiliateDashboardController,
+    CheckoutController,
+    TelegramWebhookController,
+    ReferralTrackController
+};
+
+use App\Http\Middleware\VerifyCsrfToken;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,9 +20,9 @@ use App\Http\Controllers\ReferralTrackController;
 */
 
 // ====== PUBLIC + TRACKING (klik link affiliate) ======
-Route::middleware(['affiliate.tracker'])->group(function () {
+Route::middleware('affiliate.tracker')->group(function () {
 
-    // Landing (kalau nanti mau ada halaman)
+    // Landing page (kalau nanti mau dipakai)
     Route::get('/', function () {
         return view('welcome');
     })->name('landing');
@@ -34,9 +38,9 @@ Route::middleware(['affiliate.tracker'])->group(function () {
         $botUsername = config('services.telegram.username');
 
         // Setelah middleware jalan (set cookie + log klik),
-        // kita lempar ke bot Telegram bawa kode yang sama
+        // redirect ke bot Telegram dengan kode yang sama
         return redirect()->away("https://t.me/{$botUsername}?start={$ref}");
-    })->name('redirect.ref');
+    })->name('affiliate.redirect');
 
     // Kalau nanti ada form checkout di web
     Route::post('/checkout', [CheckoutController::class, 'store'])
@@ -61,6 +65,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // ====== TELEGRAM WEBHOOK (BOT) ======
-Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle']);
+Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
 
 require __DIR__.'/auth.php';
