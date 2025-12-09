@@ -24,11 +24,19 @@ class AffiliateTracker
 
                 Affiliate::where('ref_code', $ref)->increment('total_clicks');
 
-                ReferralTrack::create([
-                    'ref_code'    => $ref,
-                    'prospect_ip' => $request->ip(),
-                    'status'      => 'clicked',
-                ]);
+                // Hanya create jika belum ada record dari IP ini dengan ref code yang sama
+                // Ini untuk handle case dimana webhook sudah create record duluan
+                $existingTrack = ReferralTrack::where('ref_code', $ref)
+                    ->where('prospect_ip', $request->ip())
+                    ->first();
+
+                if (!$existingTrack) {
+                    ReferralTrack::create([
+                        'ref_code'    => $ref,
+                        'prospect_ip' => $request->ip(),
+                        'status'      => 'clicked',
+                    ]);
+                }
             }
         }
 

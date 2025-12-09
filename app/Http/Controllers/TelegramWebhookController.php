@@ -55,18 +55,45 @@ class TelegramWebhookController extends Controller
         $telegramUsername = $from['username'] ?? null;
         $name             = trim(($from['first_name'] ?? '') . ' ' . ($from['last_name'] ?? ''));
 
-        // kalau belum ada => buat dengan status clicked
-        $lead = ReferralTrack::firstOrCreate(
-            [
-                'prospect_telegram_id' => $telegramId,
-                'ref_code'             => $ref,
-            ],
-            [
-                'prospect_name'              => $name ?: null,
-                'prospect_telegram_username' => $telegramUsername,
-                'status'                     => 'clicked',
-            ]
-        );
+        // Cari record berdasarkan telegram_id dan ref_code
+        $lead = ReferralTrack::where('prospect_telegram_id', $telegramId)
+            ->where('ref_code', $ref)
+            ->first();
+
+        if ($lead) {
+            // Update data yang sudah ada dengan info dari Telegram
+            $lead->update([
+                'prospect_name'              => $name ?: $lead->prospect_name,
+                'prospect_telegram_username' => $telegramUsername ?: $lead->prospect_telegram_username,
+            ]);
+        } else {
+            // Coba cari record kosong dari ref_code ini (dari middleware)
+            // yang belum punya telegram_id dalam 5 menit terakhir
+            $recentEmptyLead = ReferralTrack::where('ref_code', $ref)
+                ->whereNull('prospect_telegram_id')
+                ->where('created_at', '>=', now()->subMinutes(5))
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($recentEmptyLead) {
+                // Update record yang kosong dengan data Telegram
+                $recentEmptyLead->update([
+                    'prospect_telegram_id'       => $telegramId,
+                    'prospect_name'              => $name ?: null,
+                    'prospect_telegram_username' => $telegramUsername,
+                ]);
+                $lead = $recentEmptyLead;
+            } else {
+                // Buat record baru jika tidak ada
+                $lead = ReferralTrack::create([
+                    'ref_code'                   => $ref,
+                    'prospect_telegram_id'       => $telegramId,
+                    'prospect_name'              => $name ?: null,
+                    'prospect_telegram_username' => $telegramUsername,
+                    'status'                     => 'clicked',
+                ]);
+            }
+        }
 
         // kalau nanti status-nya sudah purchased / joined_channel, jangan diturunin lagi
         if (! in_array($lead->status, ['joined_channel', 'purchased'])) {
