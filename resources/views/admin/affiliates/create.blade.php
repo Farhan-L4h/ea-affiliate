@@ -23,7 +23,7 @@
                 {{-- Phone --}}
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon *</label>
-                    <input type="text" name="phone" id="phone" value="{{ old('phone') }}" required class="w-full rounded-md border-gray-300 @error('phone') border-red-500 @enderror">
+                    <input type="number" name="phone" id="phone" value="{{ old('phone') }}" required class="w-full rounded-md border-gray-300 @error('phone') border-red-500 @enderror">
                     @error('phone')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -41,7 +41,12 @@
                 {{-- Password --}}
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                    <input type="password" name="password" id="password" required class="w-full rounded-md border-gray-300 @error('password') border-red-500 @enderror">
+                    <div class="relative">
+                        <input type="password" name="password" id="password" required class="w-full rounded-md border-gray-300 @error('password') border-red-500 @enderror pr-10">
+                        <button type="button" onclick="togglePassword()" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                            <i id="toggle-icon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     @error('password')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -66,17 +71,22 @@
     </div>
 </div>
 
-@if(session('success'))
 @push('scripts')
 <script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: '{{ session('success') }}',
-        timer: 2000,
-        showConfirmButton: false
-    });
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggle-icon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
 </script>
 @endpush
-@endif
 @endsection

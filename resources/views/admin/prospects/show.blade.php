@@ -86,9 +86,9 @@
                     <label class="text-sm text-gray-500">Last Update</label>
                     <p class="font-medium">{{ $prospect->updated_at->format('d M Y H:i:s') }}</p>
                 </div>
-                <div>
+                <div class="bg-gray-100 p-2 border-rounded rounded-md">
                     <label class="text-sm text-gray-500">Keterangan</label>
-                    <p class="font-medium">{{ $prospect->notes ?? '-' }}</p>
+                    <p class="font-medium break-all overflow-wrap-anywhere">{{ $prospect->notes ?? '-' }}</p>
                 </div>
             </div>
         </div>

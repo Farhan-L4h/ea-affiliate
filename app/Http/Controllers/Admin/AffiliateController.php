@@ -55,20 +55,29 @@ class AffiliateController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', 'unique:users'],
+            'name' => ['required', 'string', 'max:25'],
+            'phone' => ['required', 'regex:/^[0-9]{10,15}$/', 'unique:users'],
             'email' => ['nullable', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', Rules\Password::defaults()],
-            'is_active' => ['boolean'],
+            'password' => ['required', 'string', 'min:8'],
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'name.max' => 'Nama maksimal 25 karakter.',
+            'phone.required' => 'Nomor telepon wajib diisi.',
+            'phone.regex' => 'Nomor telepon harus berupa angka 10-15 digit.',
+            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'phone' => $validated['phone'],
-            'email' => $validated['email'],
+            'email' => $validated['email'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => 'affiliate',
-            'is_active' => $request->has('is_active') ? true : false,
+            'is_active' => $request->has('is_active'),
         ]);
 
         // Generate affiliate code
@@ -78,7 +87,7 @@ class AffiliateController extends Controller
             'ref_code' => $refCode,
         ]);
 
-        return redirect()->route('admin.affiliates.index')
+        return redirect()->route('admin.affiliates.show', $user)
             ->with('success', 'Affiliate berhasil ditambahkan.');
     }
 
@@ -115,17 +124,25 @@ class AffiliateController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', 'unique:users,phone,' . $affiliate->id],
+            'phone' => ['required', 'regex:/^[0-9]{10,15}$/', 'unique:users,phone,' . $affiliate->id],
             'email' => ['nullable', 'email', 'max:255', 'unique:users,email,' . $affiliate->id],
-            'password' => ['nullable', Rules\Password::defaults()],
-            'is_active' => ['boolean'],
+            'password' => ['nullable', 'string', 'min:8'],
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'name.max' => 'Nama maksimal 255 karakter.',
+            'phone.required' => 'Nomor telepon wajib diisi.',
+            'phone.regex' => 'Nomor telepon harus berupa angka 10-15 digit.',
+            'phone.unique' => 'Nomor telepon sudah terdaftar.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'password.min' => 'Password minimal 8 karakter.',
         ]);
 
         $data = [
             'name' => $validated['name'],
             'phone' => $validated['phone'],
-            'email' => $validated['email'],
-            'is_active' => $request->has('is_active') ? true : false,
+            'email' => $validated['email'] ?? null,
+            'is_active' => $request->has('is_active'),
         ];
 
         if (!empty($validated['password'])) {
@@ -134,7 +151,7 @@ class AffiliateController extends Controller
 
         $affiliate->update($data);
 
-        return redirect()->route('admin.affiliates.index')
+        return redirect()->route('admin.affiliates.show', $affiliate)
             ->with('success', 'Affiliate berhasil diupdate.');
     }
 
@@ -143,11 +160,21 @@ class AffiliateController extends Controller
      */
     public function destroy(User $affiliate)
     {
-        // Soft delete: nonaktifkan saja, jangan hapus data
-        $affiliate->update(['is_active' => false]);
+        // Cek apakah akun sudah nonaktif
+        if ($affiliate->is_active) {
+            return redirect()->route('admin.affiliates.show', $affiliate)
+                ->with('error', 'Akun harus dinonaktifkan terlebih dahulu sebelum dihapus.');
+        }
+
+        // Hapus data affiliate
+        if ($affiliate->affiliate) {
+            $affiliate->affiliate->delete();
+        }
+        
+        $affiliate->delete();
 
         return redirect()->route('admin.affiliates.index')
-            ->with('success', 'Affiliate berhasil dinonaktifkan.');
+            ->with('success', 'Affiliate berhasil dihapus.');
     }
 
     /**

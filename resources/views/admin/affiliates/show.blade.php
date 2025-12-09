@@ -17,6 +17,11 @@
             <button onclick="toggleStatus()" class="px-4 py-2 {{ $affiliate->is_active ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700' }} text-white rounded-lg">
                 <i class="fas fa-{{ $affiliate->is_active ? 'ban' : 'check' }} mr-2"></i>{{ $affiliate->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
             </button>
+            @if(!$affiliate->is_active)
+            <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                <i class="fas fa-trash mr-2"></i>Hapus
+            </button>
+            @endif
             <a href="{{ route('admin.affiliates.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                 <i class="fas fa-arrow-left mr-2"></i>Kembali
             </a>
@@ -191,6 +196,30 @@ function toggleStatus() {
         }
     });
 }
+
+function confirmDelete() {
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        html: '<p class="text-gray-700">Apakah Anda yakin ingin menghapus affiliate ini?</p><p class="text-sm text-red-600 mt-2">Data yang dihapus tidak dapat dikembalikan!</p>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form').submit();
+        }
+    });
+}
 </script>
 @endpush
+
+{{-- Delete Form (hidden) --}}
+<form id="delete-form" action="{{ route('admin.affiliates.destroy', $affiliate) }}" method="POST" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
+
 @endsection
