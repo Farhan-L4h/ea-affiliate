@@ -89,3 +89,10 @@ Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle'])
     ->withoutMiddleware([VerifyCsrfToken::class]);
 
 require __DIR__.'/auth.php';
+
+
+//  Bebas
+
+Route::get('/Landing', function () {
+    return view('Landing');
+});
