@@ -28,9 +28,9 @@ use App\Http\Middleware\VerifyCsrfToken;
 // ====== PUBLIC + TRACKING (klik link affiliate) ======
 Route::middleware('affiliate.tracker')->group(function () {
 
-    // Landing page (kalau nanti mau dipakai)
+    // Landing page - redirect to login
     Route::get('/', function () {
-        return view('welcome');
+        return redirect()->route('login');
     })->name('landing');
 
     // LINK YANG DIBAGIKAN AFFILIATE
