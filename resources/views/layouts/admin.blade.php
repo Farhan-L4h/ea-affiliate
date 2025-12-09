@@ -22,13 +22,24 @@
 </head>
 <body class="font-sans antialiased bg-gray-100">
     <div class="min-h-screen">
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="fixed top-4 left-4 z-[60] lg:hidden bg-gray-800 text-white p-3 rounded-lg shadow-lg">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+
+        <!-- Overlay -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
         <!-- Sidebar -->
-        <div class="fixed inset-y-0 left-0 w-64 bg-gray-800 text-white z-50">
+        <div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-800 text-white z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 overflow-y-auto">
             <!-- Logo -->
-            <div class="flex items-center justify-center h-16 bg-gray-900">
+            <div class="flex items-center justify-between h-16 bg-gray-900 px-4">
                 <h1 class="text-xl font-bold">
                     <i class="fas fa-shield-alt mr-2"></i>Admin Panel
                 </h1>
+                <button id="close-sidebar" class="lg:hidden text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
 
             <!-- Navigation -->
@@ -58,20 +69,20 @@
         </div>
 
         <!-- Main Content -->
-        <div class="ml-64">
+        <div class="lg:ml-64">
             <!-- Top Bar -->
             <header class="bg-white shadow-sm h-16">
-                <div class="flex items-center justify-between h-full px-6">
-                    <h2 class="text-xl font-semibold text-gray-800">
+                <div class="flex items-center justify-between h-full px-4 lg:px-6">
+                    <h2 class="text-lg lg:text-xl font-semibold text-gray-800 ml-14 lg:ml-0">
                         @yield('page-title', 'Dashboard')
                     </h2>
 
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
+                    <div class="flex items-center gap-2 lg:gap-4">
+                        <span class="text-xs lg:text-sm text-gray-600 hidden sm:block">{{ auth()->user()->name }}</span>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="text-sm text-red-600 hover:text-red-800">
-                                <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                            <button type="submit" class="text-xs lg:text-sm text-red-600 hover:text-red-700">
+                                <i class="fas fa-sign-out-alt mr-1"></i><span class="hidden sm:inline">Logout</span>
                             </button>
                         </form>
                     </div>
@@ -79,7 +90,7 @@
             </header>
 
             <!-- Page Content -->
-            <main class="p-6">
+            <main class="p-4 lg:p-6">
                 @yield('content')
             </main>
         </div>
@@ -112,5 +123,38 @@
     @endif
 
     @stack('scripts')
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const closeSidebar = document.getElementById('close-sidebar');
+
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarOverlay.classList.remove('hidden');
+            mobileMenuBtn.classList.add('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebarFunc() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+            mobileMenuBtn.classList.remove('hidden');
+            document.body.style.overflow = '';
+        }
+
+        mobileMenuBtn?.addEventListener('click', openSidebar);
+        closeSidebar?.addEventListener('click', closeSidebarFunc);
+        sidebarOverlay?.addEventListener('click', closeSidebarFunc);
+
+        // Close sidebar when clicking any navigation link on mobile
+        if (window.innerWidth < 1024) {
+            document.querySelectorAll('#sidebar a').forEach(link => {
+                link.addEventListener('click', closeSidebarFunc);
+            });
+        }
+    </script>
 </body>
 </html>

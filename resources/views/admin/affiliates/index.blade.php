@@ -5,12 +5,12 @@
 @section('content')
 <div class="space-y-6">
     {{-- Header --}}
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-            <h3 class="text-2xl font-bold">Affiliates</h3>
-            <p class="text-sm text-gray-600">Kelola semua affiliate</p>
+            <h3 class="text-xl lg:text-2xl font-bold">Affiliates</h3>
+            <p class="text-xs lg:text-sm text-gray-600">Kelola semua affiliate</p>
         </div>
-        <a href="{{ route('admin.affiliates.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <a href="{{ route('admin.affiliates.create') }}" class="w-full sm:w-auto text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <i class="fas fa-plus mr-2"></i>Tambah Affiliate
         </a>
     </div>

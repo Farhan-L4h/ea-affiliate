@@ -5,25 +5,25 @@
 @section('content')
 <div class="space-y-6">
     {{-- Header --}}
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div>
-            <h3 class="text-2xl font-bold">{{ $affiliate->name }}</h3>
-            <p class="text-sm text-gray-600">Detail informasi affiliate</p>
+            <h3 class="text-xl lg:text-2xl font-bold">{{ $affiliate->name }}</h3>
+            <p class="text-xs lg:text-sm text-gray-600">Detail informasi affiliate</p>
         </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('admin.affiliates.edit', $affiliate) }}" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
-                <i class="fas fa-edit mr-2"></i>Edit
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <a href="{{ route('admin.affiliates.edit', $affiliate) }}" class="flex-1 sm:flex-none text-center px-3 lg:px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm">
+                <i class="fas fa-edit mr-1 lg:mr-2"></i><span class="hidden sm:inline">Edit</span>
             </a>
-            <button onclick="toggleStatus()" class="px-4 py-2 {{ $affiliate->is_active ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700' }} text-white rounded-lg">
-                <i class="fas fa-{{ $affiliate->is_active ? 'ban' : 'check' }} mr-2"></i>{{ $affiliate->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+            <button onclick="toggleStatus()" class="flex-1 sm:flex-none px-3 lg:px-4 py-2 {{ $affiliate->is_active ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700' }} text-white rounded-lg text-sm">
+                <i class="fas fa-{{ $affiliate->is_active ? 'ban' : 'check' }} mr-1 lg:mr-2"></i><span class="hidden sm:inline">{{ $affiliate->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</span>
             </button>
             @if(!$affiliate->is_active)
-            <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                <i class="fas fa-trash mr-2"></i>Hapus
+            <button onclick="confirmDelete()" class="flex-1 sm:flex-none px-3 lg:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm">
+                <i class="fas fa-trash mr-1 lg:mr-2"></i><span class="hidden sm:inline">Hapus</span>
             </button>
             @endif
-            <a href="{{ route('admin.affiliates.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                <i class="fas fa-arrow-left mr-2"></i>Kembali
+            <a href="{{ route('admin.affiliates.index') }}" class="flex-1 sm:flex-none text-center px-3 lg:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
+                <i class="fas fa-arrow-left mr-1 lg:mr-2"></i><span class="hidden sm:inline">Kembali</span>
             </a>
         </div>
     </div>
@@ -90,7 +90,7 @@
     </div>
 
     {{-- Statistics --}}
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
         <div class="bg-white rounded-lg shadow p-4">
             <p class="text-sm text-gray-500">Total Clicks</p>
             <p class="text-2xl font-bold text-blue-600">{{ $stats['total_clicks'] }}</p>

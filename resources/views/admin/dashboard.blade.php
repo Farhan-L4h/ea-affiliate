@@ -5,7 +5,7 @@
 @section('content')
 <div class="space-y-6">
     {{-- Statistics Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {{-- Affiliates --}}
         <a href="{{ route('admin.affiliates.index') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
             <div class="flex items-center justify-between">
@@ -72,9 +72,9 @@
     </div>
 
     {{-- Conversion Stats --}}
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4">Konversi Prospek</h3>
-        <div class="grid grid-cols-3 gap-4">
+    <div class="bg-white rounded-lg shadow p-4 lg:p-6">
+        <h3 class="text-base lg:text-lg font-semibold mb-4">Konversi Prospek</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a href="{{ route('admin.prospects.index', ['status' => 'clicked']) }}" class="text-center p-4 bg-blue-50 rounded hover:bg-blue-100 transition-colors cursor-pointer">
                 <p class="text-2xl font-bold text-blue-600">{{ $totalClicked }}</p>
                 <p class="text-sm text-gray-600">Klik Link</p>
@@ -93,10 +93,10 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
         {{-- Top Affiliates --}}
-        <div class="bg-white rounded-lg shadow">
-            <div class="p-6 border-b flex items-center justify-between">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-4 lg:p-6 border-b flex items-center justify-between">
                 <h3 class="text-lg font-semibold">Top 10 Affiliates</h3>
                 <a href="{{ route('admin.affiliates.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
                     Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
@@ -137,8 +137,8 @@
         </div>
 
         {{-- Recent Prospects --}}
-        <div class="bg-white rounded-lg shadow">
-            <div class="p-6 border-b flex items-center justify-between">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-4 lg:p-6 border-b flex items-center justify-between">
                 <h3 class="text-lg font-semibold">Prospek Terbaru</h3>
                 <a href="{{ route('admin.prospects.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
                     Lihat Semua <i class="fas fa-arrow-right ml-1"></i>

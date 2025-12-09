@@ -6,13 +6,13 @@
 <div class="space-y-6">
     {{-- Header --}}
     <div>
-        <h3 class="text-2xl font-bold">Data Prospek / Leads</h3>
-        <p class="text-sm text-gray-600">Kelola semua prospek dari semua affiliate</p>
+        <h3 class="text-xl lg:text-2xl font-bold">Data Prospek / Leads</h3>
+        <p class="text-xs lg:text-sm text-gray-600">Kelola semua prospek dari semua affiliate</p>
     </div>
 
     {{-- Filter Form --}}
     <form method="GET" class="bg-white rounded-lg shadow p-4">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Username, email, phone..." class="w-full rounded-md border-gray-300 text-sm">
@@ -51,18 +51,18 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-between mt-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
             <div class="flex items-center gap-2">
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
-                    <i class="fas fa-search mr-1"></i>Filter
+                    <i class="fas fa-search mr-1"></i><span class="hidden sm:inline">Filter</span>
                 </button>
                 <a href="{{ route('admin.prospects.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm">
-                    <i class="fas fa-redo mr-1"></i>Reset
+                    <i class="fas fa-redo mr-1"></i><span class="hidden sm:inline">Reset</span>
                 </a>
             </div>
 
             <div class="flex items-center gap-2">
-                <label class="text-sm text-gray-600">Per Page:</label>
+                <label class="text-xs lg:text-sm text-gray-600">Per Page:</label>
                 <select name="per_page" onchange="this.form.submit()" class="rounded-md border-gray-300 text-sm">
                     <option value="25" {{ request('per_page', 25) == 25 ? 'selected' : '' }}>25</option>
                     <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>

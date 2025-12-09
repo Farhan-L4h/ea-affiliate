@@ -5,20 +5,20 @@
 @section('content')
 <div class="space-y-6">
     {{-- Header --}}
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div>
-            <h3 class="text-2xl font-bold">Detail Prospek</h3>
-            <p class="text-sm text-gray-600">Informasi lengkap prospek</p>
+            <h3 class="text-xl lg:text-2xl font-bold">Detail Prospek</h3>
+            <p class="text-xs lg:text-sm text-gray-600">Informasi lengkap prospek</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button onclick="openEditModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                <i class="fas fa-edit mr-2"></i>Edit
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <button onclick="openEditModal()" class="flex-1 sm:flex-none px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                <i class="fas fa-edit mr-1 lg:mr-2"></i><span class="hidden sm:inline">Edit</span>
             </button>
-            <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                <i class="fas fa-trash mr-2"></i>Hapus
+            <button onclick="confirmDelete()" class="flex-1 sm:flex-none px-3 lg:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm">
+                <i class="fas fa-trash mr-1 lg:mr-2"></i><span class="hidden sm:inline">Hapus</span>
             </button>
-            <a href="{{ route('admin.prospects.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                <i class="fas fa-arrow-left mr-2"></i>Kembali
+            <a href="{{ route('admin.prospects.index') }}" class="flex-1 sm:flex-none text-center px-3 lg:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
+                <i class="fas fa-arrow-left mr-1 lg:mr-2"></i><span class="hidden sm:inline">Kembali</span>
             </a>
         </div>
     </div>
