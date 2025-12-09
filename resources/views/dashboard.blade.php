@@ -1,3 +1,5 @@
+@section('title', 'Dashboard Affiliate')
+
 <x-app-layout>
     {{-- <x-slot name="header">
     </x-slot> --}}
