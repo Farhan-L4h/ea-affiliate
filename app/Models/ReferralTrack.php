@@ -18,6 +18,11 @@ class ReferralTrack extends Model
         'prospect_ip',
         'ref_code',
         'status',
-        'notes', // ⬅️ tambahin ini
+        'notes',
     ];
+
+    public function affiliate()
+    {
+        return $this->belongsTo(Affiliate::class, 'ref_code', 'ref_code');
+    }
 }

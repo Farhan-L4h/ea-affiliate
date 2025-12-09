@@ -11,6 +11,12 @@ use App\Http\Controllers\{
     ReferralTrackController
 };
 
+use App\Http\Controllers\Admin\{
+    DashboardController as AdminDashboardController,
+    AffiliateController as AdminAffiliateController,
+    ProspectController as AdminProspectController
+};
+
 use App\Http\Middleware\VerifyCsrfToken;
 
 /*
@@ -59,9 +65,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 
-    // Update prospek dari modal
-    Route::patch('/leads/{lead}', [ReferralTrackController::class, 'update'])
-        ->name('leads.update');
+    // Update prospek dari modal (DISABLED - hanya admin yang bisa edit)
+    // Route::patch('/leads/{lead}', [ReferralTrackController::class, 'update'])
+    //     ->name('leads.update');
+});
+
+// ====== ADMIN AREA ======
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('dashboard');
+    
+    // Manage Affiliates
+    Route::resource('affiliates', AdminAffiliateController::class);
+    Route::patch('/affiliates/{affiliate}/toggle-status', [AdminAffiliateController::class, 'toggleStatus'])
+        ->name('affiliates.toggle-status');
+    
+    // Manage Prospects
+    Route::resource('prospects', AdminProspectController::class)->only(['index', 'show', 'update', 'destroy']);
 });
 
 // ====== TELEGRAM WEBHOOK (BOT) ======

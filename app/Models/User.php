@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'role',
+        'is_active',
     ];
 
     /**
@@ -42,5 +44,21 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_active' => 'boolean',
     ];
+
+    public function affiliate()
+    {
+        return $this->hasOne(Affiliate::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isAffiliate()
+    {
+        return $this->role === 'affiliate';
+    }
 }

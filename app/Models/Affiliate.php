@@ -19,5 +19,15 @@ class Affiliate extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function referralTracks()
+    {
+        return $this->hasMany(ReferralTrack::class, 'ref_code', 'ref_code');
+    }
+
+    public function payouts()
+    {
+        return $this->hasMany(AffiliatePayout::class, 'affiliate_ref', 'ref_code');
+    }
 }
 

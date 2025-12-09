@@ -39,7 +39,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        // User ada, coba login
+        // Cek apakah akun aktif
+        if (!$user->is_active) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'phone' => 'Akun Anda telah dinonaktifkan. Silakan hubungi admin.',
+            ]);
+        }
+
+        // User ada dan aktif, coba login
         if (! Auth::attempt(
             ['phone' => $this->phone, 'password' => $this->password],
             $this->boolean('remember')
