@@ -1,6 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
-// app/Http/Controllers/TelegramWebhookController.php
+
 use App\Models\Affiliate;
 use App\Models\ReferralTrack;
 use Illuminate\Http\Request;
@@ -11,14 +12,15 @@ class TelegramWebhookController extends Controller
 {
     public function handle(Request $request)
     {
-        Log::info('Telegram update', $request->all());
-
         $update = $request->all();
+        Log::info('Telegram update', $update);
 
+        // Pesan biasa: /start AFRATFYI
         if (isset($update['message'])) {
             $this->handleMessage($update['message']);
         }
 
+        // Perubahan member di grup / channel
         if (isset($update['chat_member'])) {
             $this->handleChatMember($update['chat_member']);
         }
@@ -30,19 +32,25 @@ class TelegramWebhookController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    /**
+     * Handle /start <REFCODE> dari user (klik link affiliate)
+     */
     protected function handleMessage(array $message): void
     {
         $chat = $message['chat'] ?? [];
         $text = $message['text'] ?? '';
 
+        // Bot cuma respon di chat private
         if (($chat['type'] ?? null) !== 'private') {
             return;
         }
 
+        // Harus mulai dengan /start
         if (strpos($text, '/start') !== 0) {
             return;
         }
 
+        // Ambil ref code setelah /start
         $parts = explode(' ', trim($text), 2);
         $ref   = strtoupper($parts[1] ?? '');
 
@@ -55,20 +63,23 @@ class TelegramWebhookController extends Controller
         $telegramUsername = $from['username'] ?? null;
         $name             = trim(($from['first_name'] ?? '') . ' ' . ($from['last_name'] ?? ''));
 
-        // Cari record berdasarkan telegram_id dan ref_code
+        if (! $telegramId) {
+            return;
+        }
+
+        // Cari lead berdasar telegram_id + ref_code
         $lead = ReferralTrack::where('prospect_telegram_id', $telegramId)
             ->where('ref_code', $ref)
             ->first();
 
         if ($lead) {
-            // Update data yang sudah ada dengan info dari Telegram
+            // Update info kalau sebelumnya masih kosong
             $lead->update([
                 'prospect_name'              => $name ?: $lead->prospect_name,
                 'prospect_telegram_username' => $telegramUsername ?: $lead->prospect_telegram_username,
             ]);
         } else {
-            // Coba cari record kosong dari ref_code ini (dari middleware)
-            // yang belum punya telegram_id dalam 5 menit terakhir
+            // Cari jejak klik kosong (dari middleware) yang belum punya telegram_id
             $recentEmptyLead = ReferralTrack::where('ref_code', $ref)
                 ->whereNull('prospect_telegram_id')
                 ->where('created_at', '>=', now()->subMinutes(5))
@@ -76,15 +87,15 @@ class TelegramWebhookController extends Controller
                 ->first();
 
             if ($recentEmptyLead) {
-                // Update record yang kosong dengan data Telegram
                 $recentEmptyLead->update([
                     'prospect_telegram_id'       => $telegramId,
                     'prospect_name'              => $name ?: null,
                     'prospect_telegram_username' => $telegramUsername,
                 ]);
+
                 $lead = $recentEmptyLead;
             } else {
-                // Buat record baru jika tidak ada
+                // Bener-bener baru
                 $lead = ReferralTrack::create([
                     'ref_code'                   => $ref,
                     'prospect_telegram_id'       => $telegramId,
@@ -95,12 +106,12 @@ class TelegramWebhookController extends Controller
             }
         }
 
-        // kalau nanti status-nya sudah purchased / joined_channel, jangan diturunin lagi
-        if (! in_array($lead->status, ['joined_channel', 'purchased'])) {
+        // Jangan nurunin status kalau sudah lebih tinggi
+        if (! in_array($lead->status, ['joined_channel', 'purchased'], true)) {
             $lead->update(['status' => 'clicked']);
         }
 
-        // kirim pesan welcome + link group
+        // Kirim pesan welcome + link channel
         $botToken = config('services.telegram.bot_token');
         $chatId   = $chat['id'];
 
@@ -117,7 +128,10 @@ class TelegramWebhookController extends Controller
         ]);
     }
 
-        protected function handleChatMember(array $chatMember): void
+    /**
+     * Handle ketika user JOIN ke channel / grup edukasi
+     */
+    protected function handleChatMember(array $chatMember): void
     {
         $chat = $chatMember['chat'] ?? null;
         $new  = $chatMember['new_chat_member'] ?? null;
@@ -126,6 +140,7 @@ class TelegramWebhookController extends Controller
             return;
         }
 
+        // Hanya track untuk channel/grup target kita
         $targetGroupId = (int) config('services.telegram.group_id');
         if ((int) ($chat['id'] ?? 0) !== $targetGroupId) {
             return;
@@ -134,29 +149,31 @@ class TelegramWebhookController extends Controller
         $user   = $new['user'] ?? null;
         $status = $new['status'] ?? null;
 
-        if (! $user || ! in_array($status, ['member', 'administrator'], true)) {
+        // Status harus member / admin / owner
+        if (! $user || ! in_array($status, ['member', 'administrator', 'creator'], true)) {
             return;
         }
 
         $telegramId = $user['id'];
 
+        // Ambil lead terakhir dari orang ini
         $lead = ReferralTrack::where('prospect_telegram_id', $telegramId)
             ->latest()
             ->first();
 
         if (! $lead) {
+            Log::info('Join channel tanpa lead', ['telegram_id' => $telegramId]);
             return;
         }
 
-        // kalau sudah purchased, jangan turunin status
-        if ($lead->status !== 'joined_channel' && $lead->status !== 'purchased') {
+        // Kalau sudah purchased / joined_channel jangan diutak-atik
+        if (! in_array($lead->status, ['joined_channel', 'purchased'], true)) {
             $lead->update([
                 'status' => 'joined_channel',
             ]);
 
-            // naikin total join channel cuma sekali
+            // Tambah total join sekali aja per lead
             Affiliate::where('ref_code', $lead->ref_code)->increment('total_joins');
         }
     }
 }
-

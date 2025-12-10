@@ -37,7 +37,29 @@ class AffiliateDashboardController extends Controller
             ->take(10)
             ->get();
 
-        // DATA PROSPEK UNTUK TABEL dengan pagination, filter & search
+        // 10 PROSPEK TERBARU UNTUK DASHBOARD (tanpa filter)
+        $recentLeads = ReferralTrack::where('ref_code', $affiliate->ref_code)
+            ->latest()
+            ->take(10)
+            ->get();
+
+        return view('dashboard', compact(
+            'affiliate',
+            'totalClicks',
+            'totalJoins',
+            'totalSales',
+            'totalCommission',
+            'recentSales',
+            'recentLeads',
+        ));
+    }
+
+    public function prospects()
+    {
+        $user = Auth::user();
+        $affiliate = Affiliate::where('user_id', $user->id)->firstOrFail();
+
+        // DATA PROSPEK DENGAN PAGINATION, FILTER & SEARCH
         $perPage = request()->get('per_page', 10);
         $query = ReferralTrack::where('ref_code', $affiliate->ref_code);
 
@@ -69,15 +91,19 @@ class AffiliateDashboardController extends Controller
             ->paginate($perPage)
             ->appends(request()->except('page'));
 
-        return view('dashboard', compact(
-            'affiliate',
-            'totalClicks',
-            'totalJoins',
-            'totalSales',
-            'totalCommission',
-            'recentSales',
-            'leads',
-        ));
+        return view('affiliate.prospects', compact('leads', 'affiliate'));
+    }
+
+    public function prospectDetail($id)
+    {
+        $user = Auth::user();
+        $affiliate = Affiliate::where('user_id', $user->id)->firstOrFail();
+
+        $prospect = ReferralTrack::where('ref_code', $affiliate->ref_code)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        return response()->json($prospect);
     }
 
 

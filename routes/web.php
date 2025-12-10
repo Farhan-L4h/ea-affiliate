@@ -58,6 +58,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [AffiliateDashboardController::class, 'index'])
         ->name('dashboard');
 
+    Route::get('/prospects', [AffiliateDashboardController::class, 'prospects'])
+        ->name('affiliate.prospects');
+
+    Route::get('/prospects/{id}', [AffiliateDashboardController::class, 'prospectDetail'])
+        ->name('affiliate.prospects.detail');
+
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])
