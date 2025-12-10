@@ -24,71 +24,100 @@
     </div>
 
     {{-- Prospect Info --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h4 class="text-lg font-semibold mb-4">Informasi Prospek</h4>
-            <div class="space-y-3">
-                <div>
-                    <label class="text-sm text-gray-500">Username / Nama</label>
-                    <p class="font-medium">{{ $prospect->prospect_telegram_username ?? $prospect->prospect_name ?? '-' }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Email</label>
-                    <p class="font-medium">{{ $prospect->prospect_email ?? '-' }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Nomor Telepon</label>
-                    <p class="font-medium">{{ $prospect->prospect_phone ?? '-' }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Telegram ID</label>
-                    <p class="font-medium">{{ $prospect->prospect_telegram_id ?? '-' }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">IP Address</label>
-                    <p class="font-medium">{{ $prospect->prospect_ip ?? '-' }}</p>
+    <div class="bg-white rounded-lg shadow-sm">
+        <div class="p-6 space-y-8">
+            {{-- Personal Information Section --}}
+            <div>
+                <h4 class="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b flex items-center">
+                    <i class="fas fa-user-circle text-blue-600 mr-2"></i>
+                    Informasi Prospek
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Username / Nama</label>
+                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $prospect->prospect_telegram_username ?? $prospect->prospect_name ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Telegram ID</label>
+                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $prospect->prospect_telegram_id ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">IP Address</label>
+                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $prospect->prospect_ip ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Email</label>
+                        <p class="text-sm font-semibold text-gray-900 mt-1 break-all">{{ $prospect->prospect_email ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Nomor Telepon</label>
+                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $prospect->prospect_phone ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Status</label>
+                        <div class="mt-1">
+                            @if($prospect->status === 'clicked')
+                                <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                    <i class="fas fa-mouse-pointer mr-1.5"></i>Klik Link
+                                </span>
+                            @elseif($prospect->status === 'joined_channel')
+                                <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                                    <i class="fas fa-users mr-1.5"></i>Join Channel
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
+                                    <i class="fas fa-shopping-cart mr-1.5"></i>Sudah Beli
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <h4 class="text-lg font-semibold mb-4">Status & Tracking</h4>
-            <div class="space-y-3">
-                <div>
-                    <label class="text-sm text-gray-500">Status</label>
-                    <p>
-                        @if($prospect->status === 'clicked')
-                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded">Klik Link</span>
-                        @elseif($prospect->status === 'joined_channel')
-                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded">Join Channel</span>
-                        @else
-                            <span class="px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded">Sudah Beli</span>
-                        @endif
-                    </p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Affiliate</label>
-                    <p class="font-medium">
-                        @if($prospect->affiliate)
-                            <a href="{{ route('admin.affiliates.show', $prospect->affiliate->user) }}" class="text-blue-600 hover:underline">
-                                {{ $prospect->affiliate->user->name }} ({{ $prospect->ref_code }})
-                            </a>
-                        @else
-                            -
-                        @endif
-                    </p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Tanggal Klik</label>
-                    <p class="font-medium">{{ $prospect->created_at->format('d M Y H:i:s') }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Last Update</label>
-                    <p class="font-medium">{{ $prospect->updated_at->format('d M Y H:i:s') }}</p>
-                </div>
-                <div class="bg-gray-100 p-2 border-rounded rounded-md">
-                    <label class="text-sm text-gray-500">Keterangan</label>
-                    <p class="font-medium break-all overflow-wrap-anywhere">{{ $prospect->notes ?? '-' }}</p>
+            {{-- Tracking Information Section --}}
+            <div>
+                <h4 class="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b flex items-center">
+                    <i class="fas fa-chart-line text-green-600 mr-2"></i>
+                    Informasi Tracking
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Affiliate</label>
+                        <p class="text-sm font-semibold text-gray-900 mt-1">
+                            @if($prospect->affiliate)
+                                <a href="{{ route('admin.affiliates.show', $prospect->affiliate->user) }}" class="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center">
+                                    <i class="fas fa-external-link-alt mr-2 text-xs"></i>
+                                    {{ $prospect->affiliate->user->name }} <span class="text-gray-500 ml-1">({{ $prospect->ref_code }})</span>
+                                </a>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Tanggal Klik</label>
+                        <p class="text-sm font-semibold text-gray-900 mt-1">
+                            <i class="fas fa-calendar-alt text-gray-400 mr-2"></i>
+                            {{ $prospect->created_at->format('d F Y, H:i') }} WIB
+                        </p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Terakhir Diperbarui</label>
+                        <p class="text-sm font-semibold text-gray-900 mt-1">
+                            <i class="fas fa-clock text-gray-400 mr-2"></i>
+                            {{ $prospect->updated_at->format('d F Y, H:i') }} WIB
+                        </p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Keterangan</label>
+                        <div class="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            @if($prospect->notes)
+                                <p class="text-sm text-gray-900 break-all leading-relaxed">{{ $prospect->notes }}</p>
+                            @else
+                                <p class="text-sm text-gray-400 italic">Tidak ada keterangan</p>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
