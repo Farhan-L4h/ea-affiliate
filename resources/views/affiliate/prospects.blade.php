@@ -159,7 +159,6 @@
         </div>
     </div>
 
-    @push('scripts')
     <script>
         function showProspectDetail(id) {
             document.getElementById('detail-modal').classList.remove('hidden');
@@ -177,47 +176,69 @@
                     }
 
                     document.getElementById('modal-content').innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Username</label>
-                                <p class="text-sm text-gray-900">${data.prospect_telegram_username || data.prospect_name || '-'}</p>
+                        <div class="space-y-6">
+                            {{-- Personal Information --}}
+                            <div class="p-4 bg-gray-100 rounded-md">
+                                <h4 class="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b">Informasi Prospek</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">Username / Nama</label>
+                                        <p class="text-sm font-medium text-gray-900 mt-1">${data.prospect_telegram_username || data.prospect_name || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">Telegram ID</label>
+                                        <p class="text-sm font-medium text-gray-900 mt-1">${data.prospect_telegram_id || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">Email</label>
+                                        <p class="text-sm font-medium text-gray-900 mt-1 break-all">${data.prospect_email || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">Nomor Telepon</label>
+                                        <p class="text-sm font-medium text-gray-900 mt-1">${data.prospect_phone || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">IP Address</label>
+                                        <p class="text-sm font-medium text-gray-900 mt-1">${data.prospect_ip || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">Status</label>
+                                        <p class="mt-1">${statusBadge}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Telegram ID</label>
-                                <p class="text-sm text-gray-900">${data.prospect_telegram_id || '-'}</p>
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Email</label>
-                                <p class="text-sm text-gray-900">${data.prospect_email || '-'}</p>
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Nomor Telepon</label>
-                                <p class="text-sm text-gray-900">${data.prospect_phone || '-'}</p>
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">IP Address</label>
-                                <p class="text-sm text-gray-900">${data.prospect_ip || '-'}</p>
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Status</label>
-                                <p class="text-sm">${statusBadge}</p>
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Tanggal Klik</label>
-                                <p class="text-sm text-gray-900">${new Date(data.created_at).toLocaleString('id-ID')}</p>
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Last Update</label>
-                                <p class="text-sm text-gray-900">${new Date(data.updated_at).toLocaleString('id-ID')}</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="text-sm font-medium text-gray-700">Keterangan</label>
-                                <p class="text-sm text-gray-900">${data.notes || '-'}</p>
+
+                            {{-- Tracking Information --}}
+                            <div class="p-4 bg-gray-100 rounded-md">
+                                <h4 class="text-sm font-semibold text-gray-900 mb-3 pb-2 border-b">Informasi Tracking</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">Tanggal Klik</label>
+                                        <p class="text-sm font-medium text-gray-900 mt-1">
+                                            <i class="fas fa-calendar-alt text-gray-400 mr-2"></i>
+                                            ${new Date(data.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">Terakhir Update</label>
+                                        <p class="text-sm font-medium text-gray-900 mt-1">
+                                            <i class="fas fa-clock text-gray-400 mr-2"></i>
+                                            ${new Date(data.updated_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="text-xs text-gray-500 uppercase tracking-wide">Keterangan</label>
+                                        <div class="mt-1 p-3 bg-gray-50 rounded-md">
+                                            <p class="text-sm text-gray-900 break-all">${data.notes || '<span class="text-gray-400 italic">Tidak ada keterangan</span>'}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;
                 })
                 .catch(error => {
+                    console.error('Error:', error);
                     document.getElementById('modal-content').innerHTML = `
                         <div class="text-center py-8">
                             <i class="fas fa-exclamation-circle text-3xl text-red-400"></i>
@@ -231,5 +252,4 @@
             document.getElementById('detail-modal').classList.add('hidden');
         }
     </script>
-    @endpush
 </x-app-layout>
