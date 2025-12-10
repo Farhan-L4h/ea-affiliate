@@ -52,13 +52,22 @@
         </div>
 
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
                     <i class="fas fa-search mr-1"></i><span class="hidden sm:inline">Filter</span>
                 </button>
                 <a href="{{ route('admin.prospects.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm">
                     <i class="fas fa-redo mr-1"></i><span class="hidden sm:inline">Reset</span>
                 </a>
+                <button type="button" onclick="toggleBulkDelete()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">
+                    <i class="fas fa-trash-alt mr-1"></i><span class="hidden sm:inline">Hapus Massal</span>
+                </button>
+                <button type="button" id="delete-selected-btn" onclick="deleteSelected()" class="hidden px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 text-sm">
+                    <i class="fas fa-check mr-1"></i>Hapus Terpilih (<span id="selected-count">0</span>)
+                </button>
+                <button type="button" id="cancel-bulk-btn" onclick="toggleBulkDelete()" class="hidden px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm">
+                    <i class="fas fa-times mr-1"></i>Batal
+                </button>
             </div>
 
             <div class="flex items-center gap-2">
@@ -77,6 +86,9 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b">
                 <tr>
+                    <th class="px-3 py-3 text-left checkbox-column hidden">
+                        <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    </th>
                     <th class="px-3 py-3 text-left">#</th>
                     <th class="px-3 py-3 text-left">Tanggal</th>
                     <th class="px-3 py-3 text-left">Username</th>
@@ -92,6 +104,9 @@
                 <tr class="border-b hover:bg-gray-50 cursor-pointer"
                     ondblclick="window.location='{{ route('admin.prospects.show', $prospect) }}'"
                     title="Double click untuk melihat detail">
+                    <td class="px-3 py-3 checkbox-column hidden">
+                        <input type="checkbox" value="{{ $prospect->id }}" class="prospect-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateSelectedCount()" onclick="event.stopPropagation()">
+                    </td>
                     <td class="px-3 py-3">{{ $prospects->firstItem() + $index }}</td>
                     <td class="px-3 py-3 text-xs">
                         {{ $prospect->created_at->format('d/m/Y H:i') }}
@@ -121,7 +136,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                    <td colspan="9" class="px-4 py-8 text-center text-gray-500">
                         Tidak ada data prospek
                     </td>
                 </tr>
@@ -135,4 +150,98 @@
         {{ $prospects->links() }}
     </div>
 </div>
+
+@push('scripts')
+<script>
+let bulkDeleteMode = false;
+
+function toggleBulkDelete() {
+    bulkDeleteMode = !bulkDeleteMode;
+    const checkboxColumns = document.querySelectorAll('.checkbox-column');
+    const deleteBtn = document.getElementById('delete-selected-btn');
+    const cancelBtn = document.getElementById('cancel-bulk-btn');
+    
+    checkboxColumns.forEach(col => {
+        col.classList.toggle('hidden');
+    });
+    
+    if (bulkDeleteMode) {
+        deleteBtn.classList.remove('hidden');
+        cancelBtn.classList.remove('hidden');
+    } else {
+        deleteBtn.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+        // Uncheck all
+        document.getElementById('select-all').checked = false;
+        document.querySelectorAll('.prospect-checkbox').forEach(cb => cb.checked = false);
+        updateSelectedCount();
+    }
+}
+
+function toggleSelectAll(checkbox) {
+    document.querySelectorAll('.prospect-checkbox').forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const selectedCount = document.querySelectorAll('.prospect-checkbox:checked').length;
+    document.getElementById('selected-count').textContent = selectedCount;
+    
+    // Update select-all checkbox
+    const allCheckboxes = document.querySelectorAll('.prospect-checkbox');
+    const checkedCheckboxes = document.querySelectorAll('.prospect-checkbox:checked');
+    document.getElementById('select-all').checked = allCheckboxes.length > 0 && allCheckboxes.length === checkedCheckboxes.length;
+}
+
+function deleteSelected() {
+    const selectedIds = Array.from(document.querySelectorAll('.prospect-checkbox:checked')).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Ada Pilihan',
+            text: 'Silakan pilih setidaknya satu prospek untuk dihapus',
+        });
+        return;
+    }
+    
+    Swal.fire({
+        title: 'Konfirmasi Hapus Massal',
+        html: `Apakah Anda yakin ingin menghapus <strong>${selectedIds.length}</strong> prospek yang dipilih?<br><br><span class="text-red-600">Data yang dihapus tidak dapat dikembalikan!</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Create form and submit
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("admin.prospects.bulk-delete") }}';
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            form.appendChild(csrfToken);
+            
+            selectedIds.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = id;
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
+</script>
+@endpush
 @endsection

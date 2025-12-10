@@ -98,4 +98,19 @@ class ProspectController extends Controller
 
         return back()->with('success', 'Prospek berhasil dihapus.');
     }
+
+    /**
+     * Bulk delete prospects
+     */
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'exists:referral_tracks,id']
+        ]);
+
+        $count = ReferralTrack::whereIn('id', $validated['ids'])->delete();
+
+        return back()->with('success', "{$count} prospek berhasil dihapus.");
+    }
 }

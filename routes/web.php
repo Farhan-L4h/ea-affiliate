@@ -88,6 +88,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     // Manage Prospects
     Route::resource('prospects', AdminProspectController::class)->only(['index', 'show', 'update', 'destroy']);
+    Route::post('/prospects/bulk-delete', [AdminProspectController::class, 'bulkDelete'])
+        ->name('prospects.bulk-delete');
 });
 
 // ====== TELEGRAM WEBHOOK (BOT) ======
