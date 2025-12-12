@@ -207,17 +207,22 @@ class TelegramBotController extends Controller
         $productPrice = 500000; // Rp 500.000
 
         try {
-            // Create payment via API
-            $response = Http::post(route('payment.create-telegram'), [
+            // Create payment directly via controller (avoid ngrok timeout)
+            $paymentController = app(\App\Http\Controllers\PaymentController::class);
+            
+            $request = new \Illuminate\Http\Request([
                 'telegram_chat_id' => $chatId,
                 'telegram_username' => $username,
                 'product' => $productName,
                 'amount' => $productPrice,
                 'affiliate_ref' => $affiliateRef,
             ]);
+            
+            $response = $paymentController->createFromTelegram($request);
+            $responseData = $response->getData(true);
 
-            if ($response->successful()) {
-                $data = $response->json('data');
+            if ($responseData['success'] ?? false) {
+                $data = $responseData['data'];
 
                 $message = "🎉 <b>Silakan selesaikan pembayaran Anda melalui link berikut:</b>\n\n";
                 $message .= "🔗 {$data['payment_url']}\n\n";
@@ -241,6 +246,7 @@ class TelegramBotController extends Controller
         } catch (\Exception $e) {
             Log::error('Buy now error', [
                 'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $this->telegram->sendMessage(

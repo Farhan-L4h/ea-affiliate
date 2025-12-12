@@ -45,10 +45,10 @@ class MootaService
     public function createTagging(string $orderId, float $amount, string $bankAccountId): ?array
     {
         try {
-            $response = Http::withHeaders([
+            $response = Http::timeout(10)->withHeaders([
                 'Authorization' => 'Bearer ' . $this->token,
                 'Accept' => 'application/json',
-            ])->post("{$this->apiUrl}/tagging/store", [
+            ])->put("{$this->apiUrl}/tagging/store", [
                 'name' => $orderId,
                 'amount' => $amount,
                 'bank_account_id' => $bankAccountId,

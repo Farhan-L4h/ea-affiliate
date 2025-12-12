@@ -85,12 +85,15 @@ class PaymentController extends Controller
 
             // Track referral if exists
             if ($request->affiliate_ref) {
-                ReferralTrack::create([
-                    'affiliate_ref' => $request->affiliate_ref,
-                    'visitor_ip' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'clicked_at' => now(),
-                ]);
+                try {
+                    ReferralTrack::create([
+                        'ref_code' => $request->affiliate_ref,
+                        'prospect_ip' => $request->ip(),
+                        'prospect_telegram_id' => $request->telegram_chat_id,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to create referral track', ['error' => $e->getMessage()]);
+                }
             }
 
             // Generate payment URL
