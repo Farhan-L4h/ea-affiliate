@@ -7,22 +7,38 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id',
-        'affiliate_ref',
+        'order_id',
+        'affiliate_id',
         'product',
-        'amount',
-        'status',
+        'sale_amount',
+        'commission_percentage',
+        'commission_amount',
+        'sale_date',
     ];
 
-    public function user()
+    protected $casts = [
+        'sale_date' => 'datetime',
+        'sale_amount' => 'decimal:2',
+        'commission_percentage' => 'decimal:2',
+        'commission_amount' => 'decimal:2',
+    ];
+
+    public function order()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Order::class);
     }
 
-    public function payout()
+    public function affiliate()
     {
-        return $this->hasOne(AffiliatePayout::class);
+        return $this->belongsTo(Affiliate::class);
+    }
+
+    public function payouts()
+    {
+        return $this->hasMany(AffiliatePayout::class);
     }
 }
 

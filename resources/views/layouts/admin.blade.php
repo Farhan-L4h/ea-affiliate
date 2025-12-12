@@ -59,6 +59,16 @@
                     Prospek / Leads
                 </a>
 
+                <a href="{{ route('admin.orders.index') }}" class="flex items-center px-6 py-3 hover:bg-gray-700 {{ request()->routeIs('admin.orders.*') ? 'bg-gray-700 border-l-4 border-blue-500' : '' }}">
+                    <i class="fas fa-shopping-cart w-5 mr-3"></i>
+                    Orders
+                </a>
+
+                <a href="{{ route('admin.sales.index') }}" class="flex items-center px-6 py-3 hover:bg-gray-700 {{ request()->routeIs('admin.sales.*') ? 'bg-gray-700 border-l-4 border-blue-500' : '' }}">
+                    <i class="fas fa-money-bill-wave w-5 mr-3"></i>
+                    Sales
+                </a>
+
                 <div class="border-t border-gray-700 my-4"></div>
 
                 {{-- <a href="{{ route('dashboard') }}" class="flex items-center px-6 py-3 hover:bg-gray-700">
@@ -156,5 +166,7 @@
             });
         }
     </script>
+    
+    @stack('scripts')
 </body>
 </html>

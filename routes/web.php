@@ -14,7 +14,9 @@ use App\Http\Controllers\{
 use App\Http\Controllers\Admin\{
     DashboardController as AdminDashboardController,
     AffiliateController as AdminAffiliateController,
-    ProspectController as AdminProspectController
+    ProspectController as AdminProspectController,
+    OrderController as AdminOrderController,
+    SaleController as AdminSaleController
 };
 
 use App\Http\Middleware\VerifyCsrfToken;
@@ -90,6 +92,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('prospects', AdminProspectController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::post('/prospects/bulk-delete', [AdminProspectController::class, 'bulkDelete'])
         ->name('prospects.bulk-delete');
+    
+    // Manage Orders
+    Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'destroy']);
+    Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
+        ->name('orders.update-status');
+    
+    // Manage Sales
+    Route::resource('sales', AdminSaleController::class)->only(['index', 'show']);
 });
 
 // ====== TELEGRAM WEBHOOK (BOT) ======

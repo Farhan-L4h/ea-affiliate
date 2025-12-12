@@ -44,7 +44,7 @@ class Order extends Model
 
     public function affiliate()
     {
-        return $this->belongsTo(Affiliate::class, 'affiliate_ref', 'referral_code');
+        return $this->belongsTo(Affiliate::class, 'affiliate_ref', 'ref_code');
     }
 
     public function sale()

@@ -71,25 +71,37 @@
         </a>
     </div>
 
-    {{-- Conversion Stats --}}
+    {{-- Orders Stats --}}
     <div class="bg-white rounded-lg shadow p-4 lg:p-6">
-        <h3 class="text-base lg:text-lg font-semibold mb-4">Konversi Prospek</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <a href="{{ route('admin.prospects.index', ['status' => 'clicked']) }}" class="text-center p-4 bg-blue-50 rounded hover:bg-blue-100 transition-colors cursor-pointer">
-                <p class="text-2xl font-bold text-blue-600">{{ $totalClicked }}</p>
-                <p class="text-sm text-gray-600">Klik Link</p>
-                <p class="text-xs text-gray-500">{{ $totalProspects > 0 ? round(($totalClicked / $totalProspects) * 100, 1) : 0 }}%</p>
+        <h3 class="text-base lg:text-lg font-semibold mb-4">Status Orders</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <a href="{{ route('admin.orders.index') }}" class="text-center p-4 bg-gray-50 rounded hover:bg-gray-100 transition-colors cursor-pointer">
+                <p class="text-2xl font-bold text-gray-600">{{ $totalOrders }}</p>
+                <p class="text-sm text-gray-600">Total Orders</p>
             </a>
-            <a href="{{ route('admin.prospects.index', ['status' => 'joined_channel']) }}" class="text-center p-4 bg-green-50 rounded hover:bg-green-100 transition-colors cursor-pointer">
-                <p class="text-2xl font-bold text-green-600">{{ $totalJoinedChannel }}</p>
-                <p class="text-sm text-gray-600">Join Channel</p>
-                <p class="text-xs text-gray-500">{{ $totalProspects > 0 ? round(($totalJoinedChannel / $totalProspects) * 100, 1) : 0 }}%</p>
+            <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}" class="text-center p-4 bg-yellow-50 rounded hover:bg-yellow-100 transition-colors cursor-pointer">
+                <p class="text-2xl font-bold text-yellow-600">{{ $pendingOrders }}</p>
+                <p class="text-sm text-gray-600">Pending</p>
+                <p class="text-xs text-gray-500">{{ $totalOrders > 0 ? round(($pendingOrders / $totalOrders) * 100, 1) : 0 }}%</p>
             </a>
-            <a href="{{ route('admin.prospects.index', ['status' => 'purchased']) }}" class="text-center p-4 bg-purple-50 rounded hover:bg-purple-100 transition-colors cursor-pointer">
-                <p class="text-2xl font-bold text-purple-600">{{ $totalPurchased }}</p>
-                <p class="text-sm text-gray-600">Sudah Beli</p>
-                <p class="text-xs text-gray-500">{{ $totalProspects > 0 ? round(($totalPurchased / $totalProspects) * 100, 1) : 0 }}%</p>
+            <a href="{{ route('admin.orders.index', ['status' => 'paid']) }}" class="text-center p-4 bg-green-50 rounded hover:bg-green-100 transition-colors cursor-pointer">
+                <p class="text-2xl font-bold text-green-600">{{ $paidOrders }}</p>
+                <p class="text-sm text-gray-600">Paid</p>
+                <p class="text-xs text-gray-500">{{ $totalOrders > 0 ? round(($paidOrders / $totalOrders) * 100, 1) : 0 }}%</p>
             </a>
+            <a href="{{ route('admin.orders.index', ['status' => 'expired']) }}" class="text-center p-4 bg-red-50 rounded hover:bg-red-100 transition-colors cursor-pointer">
+                <p class="text-2xl font-bold text-red-600">{{ $expiredOrders }}</p>
+                <p class="text-sm text-gray-600">Expired</p>
+                <p class="text-xs text-gray-500">{{ $totalOrders > 0 ? round(($expiredOrders / $totalOrders) * 100, 1) : 0 }}%</p>
+            </a>
+        </div>
+    </div>
+
+    {{-- Monthly Revenue Chart --}}
+    <div class="bg-white rounded-lg shadow p-4 lg:p-6">
+        <h3 class="text-base lg:text-lg font-semibold mb-4">Revenue Bulanan (6 Bulan Terakhir)</h3>
+        <div class="h-64">
+            <canvas id="revenueChart"></canvas>
         </div>
     </div>
 
@@ -136,11 +148,59 @@
             </div>
         </div>
 
-        {{-- Recent Prospects --}}
+        {{-- Recent Orders --}}
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="p-4 lg:p-6 border-b flex items-center justify-between">
-                <h3 class="text-lg font-semibold">Prospek Terbaru</h3>
-                <a href="{{ route('admin.prospects.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                <h3 class="text-lg font-semibold">Orders Terbaru</h3>
+                <a href="{{ route('admin.orders.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                    Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            <div class="p-6">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left border-b">
+                            <th class="pb-2">Order ID</th>
+                            <th class="pb-2">Customer</th>
+                            <th class="pb-2">Amount</th>
+                            <th class="pb-2">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($recentOrders as $order)
+                        <tr class="border-b hover:bg-gray-50 cursor-pointer"
+                            ondblclick="window.location='{{ route('admin.orders.show', $order) }}'"
+                            title="Double click untuk melihat detail">
+                            <td class="py-2 text-xs">{{ $order->order_id }}</td>
+                            <td class="py-2">{{ $order->telegram_username ?? 'N/A' }}</td>
+                            <td class="py-2 font-semibold">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
+                            <td class="py-2">
+                                @if($order->status === 'pending')
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">Pending</span>
+                                @elseif($order->status === 'paid')
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Paid</span>
+                                @elseif($order->status === 'expired')
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded">Expired</span>
+                                @else
+                                    <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">{{ ucfirst($order->status) }}</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="py-4 text-center text-gray-500">Belum ada data</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Recent Sales --}}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-4 lg:p-6 border-b flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Sales Terbaru</h3>
+                <a href="{{ route('admin.sales.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
                     Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
@@ -149,28 +209,20 @@
                     <thead>
                         <tr class="text-left border-b">
                             <th class="pb-2">Tanggal</th>
-                            <th class="pb-2">Username</th>
-                            <th class="pb-2">Status</th>
                             <th class="pb-2">Affiliate</th>
+                            <th class="pb-2">Amount</th>
+                            <th class="pb-2">Commission</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($recentProspects as $prospect)
+                        @forelse($recentSales as $sale)
                         <tr class="border-b hover:bg-gray-50 cursor-pointer"
-                            ondblclick="window.location='{{ route('admin.prospects.show', $prospect) }}'"
+                            ondblclick="window.location='{{ route('admin.sales.show', $sale) }}'"
                             title="Double click untuk melihat detail">
-                            <td class="py-2 text-xs">{{ $prospect->created_at->format('d/m H:i') }}</td>
-                            <td class="py-2">{{ $prospect->prospect_telegram_username ?? $prospect->prospect_name ?? '-' }}</td>
-                            <td class="py-2">
-                                @if($prospect->status === 'clicked')
-                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Klik</span>
-                                @elseif($prospect->status === 'joined_channel')
-                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Join</span>
-                                @else
-                                    <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">Beli</span>
-                                @endif
-                            </td>
-                            <td class="py-2 text-xs">{{ $prospect->affiliate->user->name ?? '-' }}</td>
+                            <td class="py-2 text-xs">{{ $sale->sale_date->format('d/m H:i') }}</td>
+                            <td class="py-2">{{ $sale->affiliate->user->name ?? 'N/A' }}</td>
+                            <td class="py-2 font-semibold">Rp {{ number_format($sale->sale_amount, 0, ',', '.') }}</td>
+                            <td class="py-2 text-green-600 font-semibold">Rp {{ number_format($sale->commission_amount, 0, ',', '.') }}</td>
                         </tr>
                         @empty
                         <tr>
@@ -183,4 +235,54 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Monthly Revenue Chart
+    const ctx = document.getElementById('revenueChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @json($monthlyRevenue->pluck('month')),
+                datasets: [{
+                    label: 'Revenue',
+                    data: @json($monthlyRevenue->pluck('revenue')),
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + (value / 1000000).toFixed(1) + 'jt';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+@endpush
 @endsection

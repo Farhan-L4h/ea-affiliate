@@ -7,73 +7,93 @@ use App\Models\User;
 use App\Models\Affiliate;
 use App\Models\ReferralTrack;
 use App\Models\Sale;
+use App\Models\Order;
 use App\Models\AffiliatePayout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Total Affiliates (users dengan role affiliate)
-        $totalAffiliates = User::where('role', 'affiliate')->count();
-        $activeAffiliates = User::where('role', 'affiliate')->where('is_active', true)->count();
+        // Total Affiliates
+        $totalAffiliates = Affiliate::count();
+        $activeAffiliates = Affiliate::count();
 
         // Total Prospek/Leads
         $totalProspects = ReferralTrack::count();
-        $totalClicked = ReferralTrack::where('status', 'clicked')->count();
         $totalJoinedChannel = ReferralTrack::where('status', 'joined_channel')->count();
         $totalPurchased = ReferralTrack::where('status', 'purchased')->count();
 
+        // Total Orders
+        $totalOrders = Order::count();
+        $pendingOrders = Order::where('status', 'pending')->count();
+        $paidOrders = Order::where('status', 'paid')->count();
+        $expiredOrders = Order::where('status', 'expired')->count();
+
         // Total Penjualan
         $totalSales = Sale::count();
-        $totalRevenue = Sale::sum('amount');
+        $totalRevenue = Sale::sum('sale_amount');
+
+        // Orders Revenue
+        $ordersRevenue = Order::where('status', 'paid')->sum('base_amount');
 
         // Total Komisi
-        $totalCommission = AffiliatePayout::sum('commission');
-        $paidCommission = AffiliatePayout::where('status', 'paid')->sum('commission');
-        $pendingCommission = AffiliatePayout::where('status', 'pending')->sum('commission');
+        $totalCommission = AffiliatePayout::sum('commission_amount');
+        $paidCommission = AffiliatePayout::where('status', 'paid')->sum('commission_amount');
+        $pendingCommission = AffiliatePayout::where('status', 'pending')->sum('commission_amount');
 
-        // Top Affiliates (berdasarkan jumlah prospek)
-        $topAffiliates = Affiliate::withCount('referralTracks')
+        // Top Affiliates (berdasarkan jumlah referral)
+        $topAffiliates = Affiliate::with('user')
+            ->withCount('referralTracks')
             ->orderBy('referral_tracks_count', 'desc')
             ->take(10)
             ->get();
 
-        // Recent Activities (prospek terbaru)
-        $recentProspects = ReferralTrack::with('affiliate.user')
+        // Recent Orders
+        $recentOrders = Order::with(['affiliate'])
             ->latest()
             ->take(10)
             ->get();
 
-        // Statistics per bulan (6 bulan terakhir)
-        $monthlyStats = ReferralTrack::select(
-            DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
-            DB::raw('COUNT(*) as total'),
-            DB::raw('SUM(CASE WHEN status = "clicked" THEN 1 ELSE 0 END) as clicked'),
-            DB::raw('SUM(CASE WHEN status = "joined_channel" THEN 1 ELSE 0 END) as joined'),
-            DB::raw('SUM(CASE WHEN status = "purchased" THEN 1 ELSE 0 END) as purchased')
+        // Recent Sales
+        $recentSales = Sale::with(['affiliate.user', 'order'])
+            ->latest('sale_date')
+            ->take(10)
+            ->get();
+
+        // Monthly revenue (6 months)
+        $monthlyRevenue = Order::select(
+            DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
+            DB::raw('COUNT(*) as total_orders'),
+            DB::raw('SUM(CASE WHEN status = "paid" THEN base_amount ELSE 0 END) as revenue')
         )
         ->where('created_at', '>=', now()->subMonths(6))
-        ->groupBy('month')
-        ->orderBy('month', 'asc')
+        ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
+        ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'), 'asc')
         ->get();
 
         return view('admin.dashboard', compact(
             'totalAffiliates',
             'activeAffiliates',
             'totalProspects',
-            'totalClicked',
             'totalJoinedChannel',
             'totalPurchased',
+            'totalOrders',
+            'pendingOrders',
+            'paidOrders',
+            'expiredOrders',
             'totalSales',
             'totalRevenue',
+            'ordersRevenue',
             'totalCommission',
             'paidCommission',
             'pendingCommission',
             'topAffiliates',
-            'recentProspects',
-            'monthlyStats'
+            'recentOrders',
+            'recentSales',
+            'monthlyRevenue'
         ));
     }
 }
