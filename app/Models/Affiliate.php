@@ -13,6 +13,13 @@ class Affiliate extends Model
         'total_clicks',
         'total_joins',
         'total_sales',
+        'commission_rate',
+        'total_commission',
+    ];
+
+    protected $casts = [
+        'commission_rate' => 'decimal:2',
+        'total_commission' => 'decimal:2',
     ];
 
     public function user()

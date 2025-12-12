@@ -93,8 +93,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 // ====== TELEGRAM WEBHOOK (BOT) ======
-Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle'])
+Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramBotController::class, 'webhook'])
     ->withoutMiddleware([VerifyCsrfToken::class]);
+
+// ====== PAYMENT ROUTES ======
+Route::get('/payment/{orderId}', [\App\Http\Controllers\PaymentController::class, 'show'])
+    ->name('payment.show');
+Route::get('/payment/{orderId}/status', [\App\Http\Controllers\PaymentController::class, 'checkStatus'])
+    ->name('payment.check-status');
+
+// ====== MOOTA WEBHOOK ======
+Route::post('/webhook/moota', [\App\Http\Controllers\MootaWebhookController::class, 'handle'])
+    ->withoutMiddleware([VerifyCsrfToken::class])
+    ->name('webhook.moota');
 
 require __DIR__.'/auth.php';
 

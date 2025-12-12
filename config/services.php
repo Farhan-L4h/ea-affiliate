@@ -38,4 +38,11 @@ return [
         'group_id'  => env('TELEGRAM_GROUP_ID'),
     ],
 
+    'moota' => [
+        'api_url' => env('MOOTA_API_URL', 'https://app.moota.co/api/v2'),
+        'token' => env('MOOTA_TOKEN'),
+        'bank_account_id' => env('MOOTA_BANK_ACCOUNT_ID'),
+        'webhook_secret' => env('MOOTA_WEBHOOK_SECRET'),
+    ],
+
 ];

@@ -17,3 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Payment API for Telegram Bot
+Route::post('/payment/create-telegram', [\App\Http\Controllers\PaymentController::class, 'createFromTelegram'])
+    ->name('payment.create-telegram');
