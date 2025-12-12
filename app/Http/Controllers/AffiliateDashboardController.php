@@ -26,14 +26,15 @@ class AffiliateDashboardController extends Controller
             ->where('status', 'joined_channel')
             ->count();
 
-        $totalSales = AffiliatePayout::where('affiliate_ref', $affiliate->ref_code)
+        $totalSales = Sale::where('affiliate_id', $affiliate->id)
             ->count();
 
-        $totalCommission = AffiliatePayout::where('affiliate_ref', $affiliate->ref_code)
-            ->sum('commission');
+        $totalCommission = Sale::where('affiliate_id', $affiliate->id)
+            ->sum('commission_amount');
 
-        $recentSales = Sale::where('affiliate_ref', $affiliate->ref_code)
-            ->latest()
+        $recentSales = Sale::where('affiliate_id', $affiliate->id)
+            ->with(['order'])
+            ->latest('sale_date')
             ->take(10)
             ->get();
 

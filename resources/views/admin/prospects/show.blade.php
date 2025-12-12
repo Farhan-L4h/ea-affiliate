@@ -35,7 +35,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
                         <label class="text-xs text-gray-500 uppercase tracking-wide">Username / Nama</label>
-                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $prospect->prospect_telegram_username ?? $prospect->prospect_name ?? '-' }}</p>
+                        <br>
+                        @if($prospect->prospect_telegram_username)
+                        <a href="https://t.me/{{ $prospect->prospect_telegram_username }}" target="_blank" class="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline mt-1 inline-flex items-center gap-1">
+                            {{ $prospect->prospect_telegram_username }}
+                            <i class="fas fa-external-link-alt text-xs"></i>
+                        </a>
+                        @else
+                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $prospect->prospect_name ?? '-' }}</p>
+                        @endif
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 uppercase tracking-wide">Telegram ID</label>

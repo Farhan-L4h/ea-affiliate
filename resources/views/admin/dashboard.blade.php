@@ -172,7 +172,16 @@
                             ondblclick="window.location='{{ route('admin.orders.show', $order) }}'"
                             title="Double click untuk melihat detail">
                             <td class="py-2 text-xs">{{ $order->order_id }}</td>
-                            <td class="py-2">{{ $order->telegram_username ?? 'N/A' }}</td>
+                            <td class="py-2">
+                                @if($order->telegram_username)
+                                <a href="https://t.me/{{ $order->telegram_username }}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1" onclick="event.stopPropagation();">
+                                    {{ $order->telegram_username }}
+                                    <i class="fas fa-external-link-alt" style="font-size: 0.6rem;"></i>
+                                </a>
+                                @else
+                                N/A
+                                @endif
+                            </td>
                             <td class="py-2 font-semibold">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
                             <td class="py-2">
                                 @if($order->status === 'pending')

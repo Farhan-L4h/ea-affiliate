@@ -106,7 +106,14 @@
                     <tr class="border-b hover:bg-gray-50 cursor-pointer" ondblclick="window.location='{{ route('admin.sales.show', $sale->id) }}'" title="Double click untuk melihat detail">
                         <td class="px-4 py-3">
                             <div class="font-semibold">{{ $sale->order->order_id }}</div>
-                            <div class="text-xs text-gray-500">{{ $sale->order->telegram_username ?? 'N/A' }}</div>
+                            @if($sale->order->telegram_username)
+                            <a href="https://t.me/{{ $sale->order->telegram_username }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1" onclick="event.stopPropagation();">
+                                {{ $sale->order->telegram_username }}
+                                <i class="fas fa-external-link-alt" style="font-size: 0.6rem;"></i>
+                            </a>
+                            @else
+                            <div class="text-xs text-gray-500">N/A</div>
+                            @endif
                         </td>
                         <td class="px-4 py-3">
                             <div class="font-semibold">{{ $sale->affiliate->user->name ?? 'N/A' }}</div>

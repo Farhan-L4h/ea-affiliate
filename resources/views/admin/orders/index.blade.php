@@ -133,7 +133,14 @@
                             @endif
                         </td>
                         <td class="px-4 py-3">
-                            <div class="font-semibold">{{ $order->telegram_username ?? 'N/A' }}</div>
+                            @if($order->telegram_username)
+                            <a href="https://t.me/{{ $order->telegram_username }}" target="_blank" class="font-semibold text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1" onclick="event.stopPropagation();">
+                                {{ $order->telegram_username }}
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </a>
+                            @else
+                            <div class="font-semibold text-gray-400">N/A</div>
+                            @endif
                             <div class="text-xs text-gray-500">{{ $order->telegram_chat_id }}</div>
                         </td>
                         <td class="px-4 py-3">{{ $order->product }}</td>

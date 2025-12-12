@@ -40,9 +40,9 @@ class DashboardController extends Controller
         $ordersRevenue = Order::where('status', 'paid')->sum('base_amount');
 
         // Total Komisi
-        $totalCommission = AffiliatePayout::sum('commission_amount');
-        $paidCommission = AffiliatePayout::where('status', 'paid')->sum('commission_amount');
-        $pendingCommission = AffiliatePayout::where('status', 'pending')->sum('commission_amount');
+        $totalCommission = AffiliatePayout::sum('commission');
+        $paidCommission = AffiliatePayout::where('status', 'paid')->sum('commission');
+        $pendingCommission = AffiliatePayout::where('status', 'pending')->sum('commission');
 
         // Top Affiliates (berdasarkan jumlah referral)
         $topAffiliates = Affiliate::with('user')
@@ -66,12 +66,13 @@ class DashboardController extends Controller
         // Monthly revenue (6 months)
         $monthlyRevenue = Order::select(
             DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
+            DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month_key'),
             DB::raw('COUNT(*) as total_orders'),
             DB::raw('SUM(CASE WHEN status = "paid" THEN base_amount ELSE 0 END) as revenue')
         )
         ->where('created_at', '>=', now()->subMonths(6))
-        ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
-        ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'), 'asc')
+        ->groupBy('month_key', 'month')
+        ->orderBy('month_key', 'asc')
         ->get();
 
         return view('admin.dashboard', compact(

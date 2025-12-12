@@ -93,7 +93,14 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <p class="text-sm text-secondary mb-1">Customer</p>
-                            <h6 class="mb-0">{{ $sale->order->telegram_username ?? 'N/A' }}</h6>
+                            @if($sale->order->telegram_username)
+                            <a href="https://t.me/{{ $sale->order->telegram_username }}" target="_blank" class="text-primary text-decoration-none d-inline-flex align-items-center gap-1">
+                                <h6 class="mb-0">{{ $sale->order->telegram_username }}</h6>
+                                <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
+                            </a>
+                            @else
+                            <h6 class="mb-0">N/A</h6>
+                            @endif
                             <p class="text-xs text-secondary">{{ $sale->order->telegram_chat_id }}</p>
                         </div>
                         <div class="col-md-6">
@@ -144,7 +151,14 @@
                         </div>
                         <div class="col-md-6">
                             <p class="text-sm text-secondary mb-1">Telegram</p>
-                            <h6 class="mb-0">{{ $sale->affiliate->telegram_username ?? 'N/A' }}</h6>
+                            @if($sale->affiliate->telegram_username)
+                            <a href="https://t.me/{{ $sale->affiliate->telegram_username }}" target="_blank" class="text-primary text-decoration-none d-inline-flex align-items-center gap-1">
+                                <h6 class="mb-0">{{ $sale->affiliate->telegram_username }}</h6>
+                                <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
+                            </a>
+                            @else
+                            <h6 class="mb-0">N/A</h6>
+                            @endif
                         </div>
                     </div>
 
