@@ -128,24 +128,44 @@ class MootaWebhookController extends Controller
             foreach ($items as $item) {
                 // Check in item name
                 if (preg_match('/ORDER-[A-Z0-9]+/i', $item['name'] ?? '', $matches)) {
+                    Log::info('Order ID found in items[name]', ['order_id' => strtoupper($matches[0])]);
                     return strtoupper($matches[0]);
                 }
                 // Check in item description
                 if (preg_match('/ORDER-[A-Z0-9]+/i', $item['description'] ?? '', $matches)) {
+                    Log::info('Order ID found in items[description]', ['order_id' => strtoupper($matches[0])]);
                     return strtoupper($matches[0]);
                 }
             }
         }
 
-        // Check in tags
-        $tags = $mutation['tags'] ?? [];
+        // Check in tags/taggings
+        $tags = $mutation['tags'] ?? $mutation['taggings'] ?? [];
         if (is_array($tags)) {
             foreach ($tags as $tag) {
-                if (preg_match('/ORDER-[A-Z0-9]+/i', $tag['name'] ?? '', $matches)) {
+                $tagName = is_array($tag) ? ($tag['name'] ?? '') : $tag;
+                if (preg_match('/ORDER-[A-Z0-9]+/i', $tagName, $matches)) {
+                    Log::info('Order ID found in tags', ['order_id' => strtoupper($matches[0])]);
                     return strtoupper($matches[0]);
                 }
             }
         }
+
+        // Check in contacts name (some payment gateways put it here)
+        if (isset($mutation['contacts']['name'])) {
+            $contactName = $mutation['contacts']['name'];
+            if (preg_match('/ORDER-[A-Z0-9]+/i', $contactName, $matches)) {
+                Log::info('Order ID found in contacts[name]', ['order_id' => strtoupper($matches[0])]);
+                return strtoupper($matches[0]);
+            }
+        }
+
+        Log::warning('Order ID not found in mutation', [
+            'description' => $description,
+            'note' => $note,
+            'items_count' => count($items),
+            'tags_count' => count($tags),
+        ]);
 
         return null;
     }
@@ -229,12 +249,12 @@ class MootaWebhookController extends Controller
      */
     protected function notifyCustomer(Order $order): void
     {
-        $message = "✅ <b>Pembayaran Berhasil!</b>\n\n";
-        $message .= "Order ID: <code>{$order->order_id}</code>\n";
+        $message = "✅ Pembayaran Berhasil!\n\n";
+        $message .= "Order ID: {$order->order_id}\n";
         $message .= "Produk: {$order->product}\n";
         $message .= "Total: Rp " . number_format((float)$order->total_amount, 0, ',', '.') . "\n\n";
         $message .= "Terima kasih atas pembelian Anda! 🎉\n\n";
-        $message .= "📺 <b>Tutorial Cara Pasang EA:</b>\n";
+        $message .= "📺 Tutorial Cara Pasang EA:\n";
         $message .= "🔗 https://www.youtube.com/watch?v=iNbzsabpRoE\n\n";
         $message .= "Jika ada kesulitan, hubungi admin @alwaysrighttt\n\n";
         $message .= "Selamat menggunakan EA Scalper Max Pro! 🚀";
