@@ -204,7 +204,7 @@ class TelegramBotController extends Controller
     {
         // Product info
         $productName = 'EA Scalper Cepat MT5';
-        $productPrice = 500000; // Rp 500.000
+        $productPrice = 10000; // Rp 10.000
 
         try {
             // Create payment directly via controller (avoid ngrok timeout)

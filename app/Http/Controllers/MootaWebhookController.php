@@ -121,7 +121,22 @@ class MootaWebhookController extends Controller
             return strtoupper($matches[0]);
         }
 
-        // Check in tag
+        // Check in items array (untuk Moota Sandbox format)
+        $items = $mutation['items'] ?? [];
+        if (is_array($items)) {
+            foreach ($items as $item) {
+                // Check in item name
+                if (preg_match('/ORDER-[A-Z0-9]+/i', $item['name'] ?? '', $matches)) {
+                    return strtoupper($matches[0]);
+                }
+                // Check in item description
+                if (preg_match('/ORDER-[A-Z0-9]+/i', $item['description'] ?? '', $matches)) {
+                    return strtoupper($matches[0]);
+                }
+            }
+        }
+
+        // Check in tags
         $tags = $mutation['tags'] ?? [];
         if (is_array($tags)) {
             foreach ($tags as $tag) {
@@ -142,21 +157,30 @@ class MootaWebhookController extends Controller
         // Mark order as paid
         $order->markAsPaid();
 
+        // Get affiliate if exists
+        $affiliate = null;
+        if ($order->affiliate_ref) {
+            $affiliate = Affiliate::where('ref_code', $order->affiliate_ref)->first();
+        }
+
+        // Calculate commission
+        $commissionRate = $affiliate ? ($affiliate->commission_rate ?? 20) : 0;
+        $commissionAmount = ($order->base_amount * $commissionRate) / 100;
+
         // Create sale record
         $sale = Sale::create([
-            'user_id' => $order->user_id,
-            'affiliate_ref' => $order->affiliate_ref,
+            'order_id' => $order->id,
+            'affiliate_id' => $affiliate ? $affiliate->id : null,
             'product' => $order->product,
-            'amount' => $order->base_amount,
-            'status' => 'completed',
+            'sale_amount' => $order->base_amount,
+            'commission_percentage' => $commissionRate,
+            'commission_amount' => $commissionAmount,
+            'sale_date' => now(),
         ]);
 
-        // Link order to sale
-        $order->update(['sale_id' => $sale->id]);
-
         // Process commission if affiliate exists
-        if ($order->affiliate_ref) {
-            $this->processCommission($order, $sale);
+        if ($affiliate) {
+            $this->processCommission($order, $sale, $affiliate, $commissionAmount);
         }
 
         // Notify customer via Telegram
@@ -173,20 +197,8 @@ class MootaWebhookController extends Controller
     /**
      * Process affiliate commission
      */
-    protected function processCommission(Order $order, Sale $sale): void
+    protected function processCommission(Order $order, Sale $sale, Affiliate $affiliate, float $commissionAmount): void
     {
-        $affiliate = Affiliate::where('ref_code', $order->affiliate_ref)
-            ->first();
-
-        if (!$affiliate) {
-            Log::warning('Affiliate not found', ['ref' => $order->affiliate_ref]);
-            return;
-        }
-
-        // Calculate commission (example: 20% of base amount)
-        $commissionRate = $affiliate->commission_rate ?? 20; // Default 20%
-        $commissionAmount = ($order->base_amount * $commissionRate) / 100;
-
         // Create payout record
         AffiliatePayout::create([
             'affiliate_id' => $affiliate->id,

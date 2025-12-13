@@ -8,11 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class AffiliatePayout extends Model
 {
     protected $fillable = [
-        'affiliate_ref',
+        'affiliate_id',
         'sale_id',
-        'commission',
+        'amount',
         'status',
     ];
+
+    public function affiliate()
+    {
+        return $this->belongsTo(Affiliate::class);
+    }
 
     public function sale()
     {
