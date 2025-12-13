@@ -184,6 +184,12 @@ class MootaWebhookController extends Controller
             $this->processCommission($order, $sale, $affiliate, $commissionAmount);
         }
 
+        // Update referral track status to purchased
+        if ($order->telegram_chat_id) {
+            ReferralTrack::where('prospect_telegram_id', $order->telegram_chat_id)
+                ->update(['status' => 'purchased']);
+        }
+
         // Notify customer via Telegram
         if ($order->telegram_chat_id) {
             $this->notifyCustomer($order);

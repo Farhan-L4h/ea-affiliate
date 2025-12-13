@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Affiliate;
 use App\Models\Order;
+use App\Models\ReferralTrack;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -131,6 +132,16 @@ class TelegramBotController extends Controller
             $affiliate = Affiliate::with('user')->where('ref_code', $affiliateRef)->first();
 
             if ($affiliate) {
+                // Save or update referral tracking
+                ReferralTrack::updateOrCreate(
+                    ['prospect_telegram_id' => (string)$chatId],
+                    [
+                        'prospect_telegram_username' => $username,
+                        'ref_code' => $affiliateRef,
+                        'status' => 'started',
+                    ]
+                );
+
                 $welcomeText = "🎉 <b>Selamat datang di EA Scalper Max Pro!</b>\n\n";
                 $welcomeText .= "Anda datang melalui referral dari <b>{$affiliate->user->name}</b>\n\n";
                 $welcomeText .= "Silahkan pilih menu di bawah ini untuk melanjutkan:";
@@ -238,6 +249,14 @@ class TelegramBotController extends Controller
      */
     protected function handleBuyNow(int $chatId, ?string $username, ?string $affiliateRef): void
     {
+        // Get referral tracking if not provided
+        if (!$affiliateRef) {
+            $track = ReferralTrack::where('prospect_telegram_id', (string)$chatId)->first();
+            if ($track) {
+                $affiliateRef = $track->ref_code;
+            }
+        }
+
         $message = "💰 <b>Pilih Paket EA Scalper Max Pro:</b>\n\n";
         $message .= "🔹 <b>LIFETIME</b>\n";
         $message .= "   Harga: Rp 1.300.000\n";
@@ -267,6 +286,14 @@ class TelegramBotController extends Controller
      */
     protected function handleBuyLifetime(int $chatId, ?string $username, ?string $affiliateRef): void
     {
+        // Get referral tracking if not provided
+        if (!$affiliateRef) {
+            $track = ReferralTrack::where('prospect_telegram_id', (string)$chatId)->first();
+            if ($track) {
+                $affiliateRef = $track->ref_code;
+            }
+        }
+
         $productName = 'EA Scalper Max Pro - LIFETIME';
         $productPrice = 10000; // Rp 10.000
 
@@ -278,6 +305,14 @@ class TelegramBotController extends Controller
      */
     protected function handleBuyRent(int $chatId, ?string $username, ?string $affiliateRef): void
     {
+        // Get referral tracking if not provided
+        if (!$affiliateRef) {
+            $track = ReferralTrack::where('prospect_telegram_id', (string)$chatId)->first();
+            if ($track) {
+                $affiliateRef = $track->ref_code;
+            }
+        }
+
         $productName = 'EA Scalper Max Pro - SEWA';
         $productPrice = 6000; // Rp 6.000
 

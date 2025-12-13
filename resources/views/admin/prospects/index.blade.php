@@ -23,6 +23,8 @@
                 <select name="status" class="w-full rounded-md border-gray-300 text-sm">
                     <option value="">Semua Status</option>
                     <option value="clicked" {{ request('status') === 'clicked' ? 'selected' : '' }}>Klik Link</option>
+                    <option value="started" {{ request('status') === 'started' ? 'selected' : '' }}>Started</option>
+                    <option value="order_created" {{ request('status') === 'order_created' ? 'selected' : '' }}>Order Dibuat</option>
                     <option value="joined_channel" {{ request('status') === 'joined_channel' ? 'selected' : '' }}>Join Channel</option>
                     <option value="purchased" {{ request('status') === 'purchased' ? 'selected' : '' }}>Sudah Beli</option>
                 </select>
@@ -115,12 +117,16 @@
                     <td class="px-3 py-3 truncate">{{ $prospect->prospect_email ?? '-' }}</td>
                     <td class="px-3 py-3">{{ $prospect->prospect_phone ?? '-' }}</td>
                     <td class="px-3 py-3">
-                        @if($prospect->status === 'clicked')
+                        @if($prospect->status === 'clicked' || $prospect->status === 'started')
                             <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Klik Link</span>
+                        @elseif($prospect->status === 'order_created')
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">Order Dibuat</span>
                         @elseif($prospect->status === 'joined_channel')
                             <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Join Channel</span>
-                        @else
+                        @elseif($prospect->status === 'purchased')
                             <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">Sudah Beli</span>
+                        @else
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">{{ ucfirst($prospect->status) }}</span>
                         @endif
                     </td>
                     <td class="px-3 py-3">

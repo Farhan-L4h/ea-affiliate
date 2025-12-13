@@ -83,16 +83,22 @@ class PaymentController extends Controller
                 }
             }
 
-            // Track referral if exists
+            // Track referral if exists - update status to order_created
             if ($request->affiliate_ref) {
                 try {
-                    ReferralTrack::create([
-                        'ref_code' => $request->affiliate_ref,
-                        'prospect_ip' => $request->ip(),
-                        'prospect_telegram_id' => $request->telegram_chat_id,
-                    ]);
+                    ReferralTrack::updateOrCreate(
+                        [
+                            'prospect_telegram_id' => $request->telegram_chat_id,
+                        ],
+                        [
+                            'ref_code' => $request->affiliate_ref,
+                            'prospect_ip' => $request->ip(),
+                            'prospect_telegram_username' => $request->telegram_username,
+                            'status' => 'order_created',
+                        ]
+                    );
                 } catch (\Exception $e) {
-                    Log::warning('Failed to create referral track', ['error' => $e->getMessage()]);
+                    Log::warning('Failed to update referral track', ['error' => $e->getMessage()]);
                 }
             }
 

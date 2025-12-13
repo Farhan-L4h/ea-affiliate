@@ -102,8 +102,8 @@ class AffiliateController extends Controller
             'total_clicks' => $affiliate->affiliate->referralTracks()->count(),
             'total_joined' => $affiliate->affiliate->referralTracks()->where('status', 'joined_channel')->count(),
             'total_purchased' => $affiliate->affiliate->referralTracks()->where('status', 'purchased')->count(),
-            'total_commission' => $affiliate->affiliate->payouts()->sum('commission'),
-            'paid_commission' => $affiliate->affiliate->payouts()->where('status', 'paid')->sum('commission'),
+            'total_commission' => $affiliate->affiliate->payouts()->sum('amount'),
+            'paid_commission' => $affiliate->affiliate->payouts()->where('status', 'paid')->sum('amount'),
         ];
 
         return view('admin.affiliates.show', compact('affiliate', 'stats'));

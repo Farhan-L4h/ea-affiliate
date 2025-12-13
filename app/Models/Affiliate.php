@@ -34,7 +34,7 @@ class Affiliate extends Model
 
     public function payouts()
     {
-        return $this->hasMany(AffiliatePayout::class, 'affiliate_ref', 'ref_code');
+        return $this->hasMany(AffiliatePayout::class, 'affiliate_id', 'id');
     }
 }
 

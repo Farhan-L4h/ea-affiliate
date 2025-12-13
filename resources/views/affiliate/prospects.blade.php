@@ -33,6 +33,8 @@
                                     class="block w-full text-sm rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Semua Status</option>
                                     <option value="clicked" {{ request('status') == 'clicked' ? 'selected' : '' }}>Klik Link</option>
+                                    <option value="started" {{ request('status') == 'started' ? 'selected' : '' }}>Started</option>
+                                    <option value="order_created" {{ request('status') == 'order_created' ? 'selected' : '' }}>Order Dibuat</option>
                                     <option value="joined_channel" {{ request('status') == 'joined_channel' ? 'selected' : '' }}>Join Channel</option>
                                     <option value="purchased" {{ request('status') == 'purchased' ? 'selected' : '' }}>Sudah Beli</option>
                                 </select>
