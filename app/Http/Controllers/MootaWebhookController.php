@@ -31,20 +31,21 @@ class MootaWebhookController extends Controller
     public function handle(Request $request)
     {
         try {
-            Log::info('Moota webhook received', $request->all());
+            $payload = $request->all();
+            Log::info('Moota webhook received', $payload);
+
+            // Moota sends data as array, get first element
+            $mutation = is_array($payload) && isset($payload[0]) ? $payload[0] : $payload;
 
             // Verify webhook signature (optional but recommended)
             $signature = $request->header('X-Moota-Signature');
             if ($signature) {
-                $isValid = $this->mootaService->verifyWebhookSignature($signature, $request->all());
+                $isValid = $this->mootaService->verifyWebhookSignature($signature, $mutation);
                 if (!$isValid) {
                     Log::warning('Invalid Moota webhook signature');
                     return response()->json(['error' => 'Invalid signature'], 401);
                 }
             }
-
-            // Get mutation data
-            $mutation = $request->all();
             
             // Extract order ID from note/description
             $orderId = $this->extractOrderId($mutation);
@@ -226,8 +227,11 @@ class MootaWebhookController extends Controller
         $message .= "Order ID: <code>{$order->order_id}</code>\n";
         $message .= "Produk: {$order->product}\n";
         $message .= "Total: Rp " . number_format((float)$order->total_amount, 0, ',', '.') . "\n\n";
-        $message .= "Terima kasih atas pembelian Anda!\n";
-        $message .= "Link download dan akses produk akan segera dikirimkan.";
+        $message .= "Terima kasih atas pembelian Anda! 🎉\n\n";
+        $message .= "📺 <b>Tutorial Cara Pasang EA:</b>\n";
+        $message .= "🔗 https://www.youtube.com/watch?v=iNbzsabpRoE\n\n";
+        $message .= "Jika ada kesulitan, hubungi admin @alwaysrighttt\n\n";
+        $message .= "Selamat menggunakan EA Scalper Max Pro! 🚀";
 
         try {
             $this->telegramService->sendMessage($order->telegram_chat_id, $message);

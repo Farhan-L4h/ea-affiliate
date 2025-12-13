@@ -48,6 +48,22 @@ class TelegramService
     }
 
     /**
+     * Send reply keyboard (persistent menu at bottom)
+     */
+    public function sendReplyKeyboard(int|string $chatId, string $text, array $buttons, bool $resize = true, bool $oneTime = false): void
+    {
+        $keyboard = [
+            'keyboard' => $buttons,
+            'resize_keyboard' => $resize,
+            'one_time_keyboard' => $oneTime,
+        ];
+
+        $this->sendMessage($chatId, $text, [
+            'reply_markup' => json_encode($keyboard),
+        ]);
+    }
+
+    /**
      * Answer callback query
      */
     public function answerCallbackQuery(string $callbackQueryId, string $text = '', bool $showAlert = false): void

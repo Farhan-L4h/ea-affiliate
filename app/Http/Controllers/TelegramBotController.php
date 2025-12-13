@@ -76,8 +76,41 @@ class TelegramBotController extends Controller
             return;
         }
 
-        // Default response
-        $this->sendWelcomeMenu($chatId);
+        // Handle reply keyboard buttons
+        switch ($text) {
+            case '💰 Beli Sekarang':
+                $this->handleBuyNow($chatId, $username, null);
+                break;
+
+            case '💬 Tanya Langsung':
+                $this->handleAskQuestion($chatId);
+                break;
+
+            case '✨ Fitur-Fitur':
+                $this->handleFeatures($chatId);
+                break;
+
+            case '🛡️ Garansi Uang Kembali':
+                $this->handleMoneyBack($chatId);
+                break;
+
+            case '🎯 Lifetime - Rp 1.300.000':
+                $this->handleBuyLifetime($chatId, $username, null);
+                break;
+
+            case '⏰ Sewa - Rp 600.000':
+                $this->handleBuyRent($chatId, $username, null);
+                break;
+
+            case '« Kembali':
+                $this->sendWelcomeMenu($chatId);
+                break;
+
+            default:
+                // Default response
+                $this->sendWelcomeMenu($chatId);
+                break;
+        }
     }
 
     /**
@@ -94,7 +127,7 @@ class TelegramBotController extends Controller
             $affiliate = Affiliate::with('user')->where('ref_code', $affiliateRef)->first();
 
             if ($affiliate) {
-                $welcomeText = "🎉 <b>Selamat datang di EA Scalper Cepat MT5!</b>\n\n";
+                $welcomeText = "🎉 <b>Selamat datang di EA Scalper Max Pro!</b>\n\n";
                 $welcomeText .= "Anda datang melalui referral dari <b>{$affiliate->user->name}</b>\n\n";
                 $welcomeText .= "Silahkan pilih menu di bawah ini untuk melanjutkan:";
 
@@ -104,43 +137,35 @@ class TelegramBotController extends Controller
         }
 
         // Default welcome
-        $welcomeText = "🎉 <b>Selamat datang di bot manajemen pembelian kami!</b>\n\n";
+        $welcomeText = "🎉 <b>Selamat datang di EA Scalper Max Pro!</b>\n\n";
         $welcomeText .= "Silakan pilih menu di bawah ini:";
         
         $this->sendWelcomeMenu($chatId, $welcomeText);
     }
 
     /**
-     * Send welcome menu with inline buttons
+     * Send welcome menu with reply keyboard
      */
     protected function sendWelcomeMenu(int $chatId, ?string $text = null, ?string $affiliateRef = null): void
     {
         if (!$text) {
-            $text = "🎉 <b>Selamat datang di bot manajemen pembelian kami!</b>\n\n";
+            $text = "🎉 <b>Selamat datang di EA Scalper Max Pro!</b>\n\n";
             $text .= "Silakan pilih menu di bawah ini:";
         }
 
-        $callbackData = $affiliateRef ? "buy_now:{$affiliateRef}" : "buy_now";
-
+        // Use reply keyboard (menu at bottom)
         $buttons = [
             [
-                ['text' => '💰 Beli Sekarang', 'callback_data' => $callbackData],
+                ['text' => '💰 Beli Sekarang'],
+                ['text' => '💬 Tanya Langsung'],
             ],
             [
-                ['text' => '📹 Video Backtest', 'callback_data' => 'video_backtest'],
-                ['text' => '📊 Hasil Backtest', 'callback_data' => 'hasil_backtest'],
-            ],
-            [
-                ['text' => '🎁 Uji Coba Gratis', 'callback_data' => 'free_trial'],
-                ['text' => '💬 Tanya Langsung', 'callback_data' => 'ask_question'],
-            ],
-            [
-                ['text' => '✨ Fitur-Fitur', 'callback_data' => 'features'],
-                ['text' => '🛡️ Garansi Uang Kembali', 'callback_data' => 'money_back'],
+                ['text' => '✨ Fitur-Fitur'],
+                ['text' => '🛡️ Garansi Uang Kembali'],
             ],
         ];
 
-        $this->telegram->sendInlineKeyboard($chatId, $text, $buttons);
+        $this->telegram->sendReplyKeyboard($chatId, $text, $buttons);
     }
 
     /**
@@ -167,16 +192,12 @@ class TelegramBotController extends Controller
                 $this->handleBuyNow($chatId, $username, $param);
                 break;
 
-            case 'video_backtest':
-                $this->handleVideoBacktest($chatId);
+            case 'buy_lifetime':
+                $this->handleBuyLifetime($chatId, $username, $param);
                 break;
 
-            case 'hasil_backtest':
-                $this->handleHasilBacktest($chatId);
-                break;
-
-            case 'free_trial':
-                $this->handleFreeTrial($chatId);
+            case 'buy_rent':
+                $this->handleBuyRent($chatId, $username, $param);
                 break;
 
             case 'ask_question':
@@ -191,6 +212,14 @@ class TelegramBotController extends Controller
                 $this->handleMoneyBack($chatId);
                 break;
 
+            case 'tutorial':
+                $this->handleTutorial($chatId);
+                break;
+
+            case 'back_to_menu':
+                $this->sendWelcomeMenu($chatId);
+                break;
+
             default:
                 $this->sendWelcomeMenu($chatId);
                 break;
@@ -198,13 +227,61 @@ class TelegramBotController extends Controller
     }
 
     /**
-     * Handle Buy Now button
+     * Handle Buy Now button - Show package options
      */
     protected function handleBuyNow(int $chatId, ?string $username, ?string $affiliateRef): void
     {
-        // Product info
-        $productName = 'EA Scalper Cepat MT5';
+        $message = "💰 <b>Pilih Paket EA Scalper Max Pro:</b>\n\n";
+        $message .= "🔹 <b>LIFETIME</b>\n";
+        $message .= "   Harga: Rp 1.300.000\n";
+        $message .= "   Full Support & Update Selamanya\n\n";
+        $message .= "🔹 <b>SEWA</b>\n";
+        $message .= "   Harga: Rp 600.000\n";
+        $message .= "   Support & Update Selama Masa Sewa\n\n";
+        $message .= "Silakan pilih paket yang Anda inginkan:";
+
+        $buttons = [
+            [
+                ['text' => '🎯 Lifetime - Rp 1.300.000'],
+            ],
+            [
+                ['text' => '⏰ Sewa - Rp 600.000'],
+            ],
+            [
+                ['text' => '« Kembali'],
+            ],
+        ];
+
+        $this->telegram->sendReplyKeyboard($chatId, $message, $buttons);
+    }
+
+    /**
+     * Handle Buy Lifetime
+     */
+    protected function handleBuyLifetime(int $chatId, ?string $username, ?string $affiliateRef): void
+    {
+        $productName = 'EA Scalper Max Pro - LIFETIME';
         $productPrice = 10000; // Rp 10.000
+
+        $this->processPayment($chatId, $username, $affiliateRef, $productName, $productPrice);
+    }
+
+    /**
+     * Handle Buy Rent
+     */
+    protected function handleBuyRent(int $chatId, ?string $username, ?string $affiliateRef): void
+    {
+        $productName = 'EA Scalper Max Pro - SEWA';
+        $productPrice = 6000; // Rp 6.000
+
+        $this->processPayment($chatId, $username, $affiliateRef, $productName, $productPrice);
+    }
+
+    /**
+     * Process payment creation
+     */
+    protected function processPayment(int $chatId, ?string $username, ?string $affiliateRef, string $productName, int $productPrice): void
+    {
 
         try {
             // Create payment directly via controller (avoid ngrok timeout)
@@ -234,7 +311,8 @@ class TelegramBotController extends Controller
                 $message .= "🔢 <b>Kode Unik:</b> {$data['unique_code']}\n\n";
                 $message .= "⏰ <b>Batas Waktu:</b> " . date('d M Y H:i', strtotime($data['expired_at'])) . "\n\n";
                 $message .= "📝 <b>Order ID:</b> <code>{$data['order_id']}</code>\n\n";
-                $message .= "Pembayaran akan otomatis terverifikasi setelah transfer.";
+                $message .= "Pembayaran akan otomatis terverifikasi setelah transfer.\n\n";
+                $message .= "Setelah pembayaran lunas, Anda akan menerima link tutorial cara pasang EA.";
 
                 $this->telegram->sendMessage($chatId, $message);
             } else {
@@ -257,34 +335,14 @@ class TelegramBotController extends Controller
     }
 
     /**
-     * Handle other menu items
+     * Handle Tutorial
      */
-    protected function handleVideoBacktest(int $chatId): void
+    protected function handleTutorial(int $chatId): void
     {
-        $message = "📹 <b>Video Backtest EA Scalper Cepat</b>\n\n";
-        $message .= "Lihat hasil backtest EA kami di video berikut:\n";
-        $message .= "🔗 [Link Video]\n\n";
-        $message .= "Untuk kembali ke menu utama, ketik /start";
-
-        $this->telegram->sendMessage($chatId, $message);
-    }
-
-    protected function handleHasilBacktest(int $chatId): void
-    {
-        $message = "📊 <b>Hasil Backtest EA Scalper Cepat</b>\n\n";
-        $message .= "Profit: 500%\n";
-        $message .= "Drawdown: 15%\n";
-        $message .= "Win Rate: 75%\n\n";
-        $message .= "Untuk kembali ke menu utama, ketik /start";
-
-        $this->telegram->sendMessage($chatId, $message);
-    }
-
-    protected function handleFreeTrial(int $chatId): void
-    {
-        $message = "🎁 <b>Uji Coba Gratis</b>\n\n";
-        $message .= "Dapatkan akses trial 7 hari!\n";
-        $message .= "Hubungi admin untuk mendapatkan akses.\n\n";
+        $message = "📺 <b>Cara Pasang EA Scalper Max Pro</b>\n\n";
+        $message .= "Tonton video tutorial lengkap cara install dan setup EA:\n\n";
+        $message .= "🔗 https://www.youtube.com/watch?v=iNbzsabpRoE\n\n";
+        $message .= "Jika ada kesulitan, hubungi admin @alwaysrighttt\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
 
         $this->telegram->sendMessage($chatId, $message);
@@ -293,8 +351,9 @@ class TelegramBotController extends Controller
     protected function handleAskQuestion(int $chatId): void
     {
         $message = "💬 <b>Tanya Langsung</b>\n\n";
-        $message .= "Silakan hubungi admin kami:\n";
-        $message .= "📱 Telegram: @admin\n\n";
+        $message .= "Silakan hubungi admin kami untuk konsultasi atau pertanyaan:\n\n";
+        $message .= "📱 Telegram: @alwaysrighttt\n\n";
+        $message .= "Admin siap membantu Anda!\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
 
         $this->telegram->sendMessage($chatId, $message);
@@ -302,12 +361,17 @@ class TelegramBotController extends Controller
 
     protected function handleFeatures(int $chatId): void
     {
-        $message = "✨ <b>Fitur-Fitur EA Scalper Cepat</b>\n\n";
-        $message .= "• Scalping otomatis\n";
-        $message .= "• Risk management\n";
-        $message .= "• Multi timeframe\n";
-        $message .= "• Trailing stop\n";
-        $message .= "• Dan masih banyak lagi!\n\n";
+        $message = "✨ <b>Kenapa EA Ini Aman dan Bisa Profit Konsisten?</b>\n\n";
+        $message .= "1️⃣ Menerapkan Sistem Low - Medium - High\n";
+        $message .= "2️⃣ Sistem Grid Step dan Hedging Maksimum Layer\n";
+        $message .= "3️⃣ Lock & Unlock Hedging SL+ BE\n";
+        $message .= "4️⃣ TP SL Harian\n";
+        $message .= "5️⃣ Draw Down Kontrol\n";
+        $message .= "6️⃣ News Filter\n";
+        $message .= "7️⃣ Bulk Close (Khusus V2)\n";
+        $message .= "8️⃣ Potensial Profit Harian 2-10%\n";
+        $message .= "9️⃣ VIP Support Full Lifetime Update Sesuai Kondisi Pasar\n\n";
+        $message .= "💡 <i>EA dirancang untuk profit konsisten dengan risk management yang ketat!</i>\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
 
         $this->telegram->sendMessage($chatId, $message);
@@ -315,9 +379,16 @@ class TelegramBotController extends Controller
 
     protected function handleMoneyBack(int $chatId): void
     {
-        $message = "🛡️ <b>Garansi Uang Kembali</b>\n\n";
-        $message .= "Kami memberikan garansi 30 hari uang kembali jika EA tidak sesuai harapan.\n\n";
-        $message .= "Syarat dan ketentuan berlaku.\n\n";
+        $message = "🛡️ <b>Garansi 100% Jika MC Uang Kembali</b>\n\n";
+        $message .= "<b>*Syarat Ketentuan Berlaku:</b>\n";
+        $message .= "1️⃣ Garansi Berlaku untuk Full Version\n";
+        $message .= "2️⃣ Memakai Set dan EA Update Terbaru\n";
+        $message .= "3️⃣ Garansi Berlaku Sampai Modal Beli Robot dan Modal Trading Kembali\n";
+        $message .= "4️⃣ Garansi Kembali untuk Uang Pembelian EA\n";
+        $message .= "5️⃣ Full Support Selamanya di Grup VIP Member\n";
+        $message .= "6️⃣ Modal Optimal 600$\n";
+        $message .= "7️⃣ Akses Akun dan VPS Kami yang Settingkan\n\n";
+        $message .= "💰 <i>Garansi ini menunjukkan kami serius dengan kualitas EA!</i>\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
 
         $this->telegram->sendMessage($chatId, $message);
