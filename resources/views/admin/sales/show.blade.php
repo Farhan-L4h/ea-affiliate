@@ -140,7 +140,7 @@
                         </div>
                         <div class="col-md-6">
                             <p class="text-sm text-secondary mb-1">Referral Code</p>
-                            <h6 class="mb-0">{{ $sale->affiliate->ref_code }}</h6>
+                            <h6 class="mb-0">{{ $sale->affiliate->ref_code ?? 'N/A' }}</h6>
                         </div>
                     </div>
 
@@ -151,9 +151,9 @@
                         </div>
                         <div class="col-md-6">
                             <p class="text-sm text-secondary mb-1">Telegram</p>
-                            @if($sale->affiliate->telegram_username)
+                            @if($sale->affiliate && $sale->affiliate->telegram_username)
                             <a href="https://t.me/{{ $sale->affiliate->telegram_username }}" target="_blank" class="text-primary text-decoration-none d-inline-flex align-items-center gap-1">
-                                <h6 class="mb-0">{{ $sale->affiliate->telegram_username }}</h6>
+                                <h6 class="mb-0">{{ $sale->affiliate->telegram_username ?? 'N/A' }}</h6>
                                 <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
                             </a>
                             @else
@@ -162,11 +162,13 @@
                         </div>
                     </div>
 
+                    @if($sale->affiliate)
                     <div class="mt-3">
                         <a href="{{ route('admin.affiliates.show', $sale->affiliate->id) }}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-user me-2"></i>View Affiliate Profile
                         </a>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>

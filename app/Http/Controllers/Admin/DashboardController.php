@@ -40,9 +40,9 @@ class DashboardController extends Controller
         $ordersRevenue = Order::where('status', 'paid')->sum('base_amount');
 
         // Total Komisi
-        $totalCommission = AffiliatePayout::sum('commission');
-        $paidCommission = AffiliatePayout::where('status', 'paid')->sum('commission');
-        $pendingCommission = AffiliatePayout::where('status', 'pending')->sum('commission');
+        $totalCommission = AffiliatePayout::sum('amount');
+        $paidCommission = AffiliatePayout::where('status', 'paid')->sum('amount');
+        $pendingCommission = AffiliatePayout::where('status', 'pending')->sum('amount');
 
         // Top Affiliates (berdasarkan jumlah referral)
         $topAffiliates = Affiliate::with('user')

@@ -117,7 +117,7 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="font-semibold">{{ $sale->affiliate->user->name ?? 'N/A' }}</div>
-                            <div class="text-xs text-gray-500">{{ $sale->affiliate->ref_code }}</div>
+                            <div class="text-xs text-gray-500">{{ $sale->affiliate->ref_code ?? 'N/A' }}</div>
                         </td>
                         <td class="px-4 py-3">{{ $sale->product }}</td>
                         <td class="px-4 py-3 text-right font-semibold">Rp {{ number_format($sale->sale_amount, 0, ',', '.') }}</td>

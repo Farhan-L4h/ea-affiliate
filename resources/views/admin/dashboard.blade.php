@@ -97,15 +97,15 @@
         </div>
     </div>
 
-    {{-- Monthly Revenue Chart --}}
-    <div class="bg-white rounded-lg shadow p-4 lg:p-6">
-        <h3 class="text-base lg:text-lg font-semibold mb-4">Revenue Bulanan (6 Bulan Terakhir)</h3>
-        <div class="h-64">
-            <canvas id="revenueChart"></canvas>
-        </div>
-    </div>
-
+    
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
+        {{-- Monthly Revenue Chart --}}
+        <div class="bg-white rounded-lg shadow p-4 lg:p-6">
+            <h3 class="text-base lg:text-lg font-semibold mb-4">Revenue Bulanan (6 Bulan Terakhir)</h3>
+            <div class="h-64">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
         {{-- Top Affiliates --}}
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="p-4 lg:p-6 border-b flex items-center justify-between">
