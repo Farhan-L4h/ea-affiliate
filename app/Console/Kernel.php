@@ -12,9 +12,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Check pending payments every 3 minutes
+        // Check pending payments
+        // Every 1 minute in local, every 3 minutes in production
+        $interval = app()->environment('local') ? 'everyMinute' : 'everyThreeMinutes';
+        
         $schedule->command('payment:check')
-            ->everyThreeMinutes()
+            ->$interval()
             ->withoutOverlapping()
             ->runInBackground();
     }
