@@ -94,6 +94,10 @@ class TelegramBotController extends Controller
                 $this->handleMoneyBack($chatId);
                 break;
 
+            case '📢 Gabung Channel':
+                $this->handleJoinChannel($chatId);
+                break;
+
             case '🎯 Lifetime - Rp 1.300.000':
                 $this->handleBuyLifetime($chatId, $username, null);
                 break;
@@ -162,6 +166,9 @@ class TelegramBotController extends Controller
             [
                 ['text' => '✨ Fitur-Fitur'],
                 ['text' => '🛡️ Garansi Uang Kembali'],
+            ],
+            [
+                ['text' => '📢 Gabung Channel'],
             ],
         ];
 
@@ -373,6 +380,22 @@ class TelegramBotController extends Controller
         $message .= "9️⃣ VIP Support Full Lifetime Update Sesuai Kondisi Pasar\n\n";
         $message .= "💡 <i>EA dirancang untuk profit konsisten dengan risk management yang ketat!</i>\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
+
+        $this->telegram->sendMessage($chatId, $message);
+    }
+
+    protected function handleJoinChannel(int $chatId): void
+    {
+        $message = "📢 <b>Gabung Channel Scalper Max Pro</b>\n\n";
+        $message .= "Join grup edukasi kami untuk mendapatkan:\n\n";
+        $message .= "✅ Update EA terbaru\n";
+        $message .= "✅ Tips & trik trading\n";
+        $message .= "✅ Analisa market harian\n";
+        $message .= "✅ Setting EA optimal\n";
+        $message .= "✅ Support dari tim & komunitas\n\n";
+        $message .= "👉 Klik link di bawah untuk bergabung:\n";
+        $message .= "https://t.me/scalpermaxproai\n\n";
+        $message .= "Kontak admin: @Desa_trading";
 
         $this->telegram->sendMessage($chatId, $message);
     }
