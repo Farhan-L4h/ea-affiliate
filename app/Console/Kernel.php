@@ -12,7 +12,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Check pending payments every 3 minutes
+        $schedule->command('payment:check')
+            ->everyThreeMinutes()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

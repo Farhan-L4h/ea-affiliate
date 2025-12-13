@@ -8,12 +8,16 @@ use Illuminate\Support\Facades\Log;
 class MootaService
 {
     protected string $apiUrl;
-    protected string $token;
+    protected ?string $token;
 
     public function __construct()
     {
         $this->apiUrl = config('services.moota.api_url', 'https://app.moota.co/api/v2');
         $this->token  = config('services.moota.token');
+
+        if (empty($this->token)) {
+            Log::warning('Moota token is not configured. Please set MOOTA_TOKEN in .env file');
+        }
     }
 
     /**
