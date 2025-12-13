@@ -99,7 +99,7 @@ class TelegramBotController extends Controller
                 $this->handleJoinChannel($chatId);
                 break;
 
-            case '🎯 Lifetime - Rp 1.300.000':
+            case '🎯 Lifetime - Rp 3.500.000':
                 $this->handleBuyLifetime($chatId, $username, null);
                 break;
 
@@ -259,7 +259,7 @@ class TelegramBotController extends Controller
 
         $message = "💰 <b>Pilih Paket EA Scalper Max Pro:</b>\n\n";
         $message .= "🔹 <b>LIFETIME</b>\n";
-        $message .= "   Harga: Rp 1.300.000\n";
+        $message .= "   Harga: Rp 3.500.000\n";
         $message .= "   Full Support & Update Selamanya\n\n";
         $message .= "🔹 <b>SEWA</b>\n";
         $message .= "   Harga: Rp 600.000\n";
@@ -268,7 +268,7 @@ class TelegramBotController extends Controller
 
         $buttons = [
             [
-                ['text' => '🎯 Lifetime - Rp 1.300.000'],
+                ['text' => '🎯 Lifetime - Rp 3.500.000'],
             ],
             [
                 ['text' => '⏰ Sewa - Rp 600.000'],
@@ -295,7 +295,7 @@ class TelegramBotController extends Controller
         }
 
         $productName = 'EA Scalper Max Pro - LIFETIME';
-        $productPrice = 10000; // Rp 10.000
+        $productPrice = 3500000; // Rp 3.500.000
 
         $this->processPayment($chatId, $username, $affiliateRef, $productName, $productPrice);
     }
@@ -314,7 +314,7 @@ class TelegramBotController extends Controller
         }
 
         $productName = 'EA Scalper Max Pro - SEWA';
-        $productPrice = 6000; // Rp 6.000
+        $productPrice = 600000; // Rp 600.000
 
         $this->processPayment($chatId, $username, $affiliateRef, $productName, $productPrice);
     }
