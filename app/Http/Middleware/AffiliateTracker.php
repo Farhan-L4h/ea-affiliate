@@ -17,19 +17,20 @@ class AffiliateTracker
         if ($request->has('ref')) {
             $ref = strtoupper($request->query('ref'));
 
-            // first click wins
+            // First click wins - check if cookie already exists
             if (! $request->cookies->has('affiliate_ref')) {
                 $minutes = 60 * 24 * 90; // 90 hari
                 Cookie::queue('affiliate_ref', $ref, $minutes);
 
+                // Increment total clicks for this affiliate
                 Affiliate::where('ref_code', $ref)->increment('total_clicks');
 
-                // Hanya create jika belum ada record dari IP ini dengan ref code yang sama
-                // Ini untuk handle case dimana webhook sudah create record duluan
-                $existingTrack = ReferralTrack::where('ref_code', $ref)
-                    ->where('prospect_ip', $request->ip())
+                // Check if there's already a record from this IP
+                $existingTrack = ReferralTrack::where('prospect_ip', $request->ip())
+                    ->whereNotNull('prospect_ip')
                     ->first();
 
+                // Only create if no existing record from this IP
                 if (!$existingTrack) {
                     ReferralTrack::create([
                         'ref_code'    => $ref,
@@ -37,7 +38,9 @@ class AffiliateTracker
                         'status'      => 'clicked',
                     ]);
                 }
+                // If exists, keep the original affiliate (first click wins)
             }
+            // If cookie exists, ignore the new ref code (first click wins)
         }
 
         return $next($request);

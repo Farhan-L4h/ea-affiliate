@@ -132,22 +132,37 @@ class TelegramBotController extends Controller
             $affiliate = Affiliate::with('user')->where('ref_code', $affiliateRef)->first();
 
             if ($affiliate) {
-                // Save or update referral tracking
-                ReferralTrack::updateOrCreate(
-                    ['prospect_telegram_id' => (string)$chatId],
-                    [
+                // Check if user already has a referral record
+                $existingTrack = ReferralTrack::where('prospect_telegram_id', (string)$chatId)->first();
+
+                if (!$existingTrack) {
+                    // First click wins - create new record
+                    ReferralTrack::create([
+                        'prospect_telegram_id' => (string)$chatId,
                         'prospect_telegram_username' => $username,
                         'ref_code' => $affiliateRef,
                         'status' => 'started',
-                    ]
-                );
+                    ]);
 
-                $welcomeText = "🎉 <b>Selamat datang di EA Scalper Max Pro!</b>\n\n";
-                $welcomeText .= "Anda datang melalui referral dari <b>{$affiliate->user->name}</b>\n\n";
-                $welcomeText .= "Silahkan pilih menu di bawah ini untuk melanjutkan:";
+                    $welcomeText = "🎉 <b>Selamat datang di EA Scalper Max Pro!</b>\n\n";
+                    $welcomeText .= "Anda datang melalui referral dari <b>{$affiliate->user->name}</b>\n\n";
+                    $welcomeText .= "Silahkan pilih menu di bawah ini untuk melanjutkan:";
 
-                $this->sendWelcomeMenu($chatId, $welcomeText, $affiliateRef);
-                return;
+                    $this->sendWelcomeMenu($chatId, $welcomeText, $affiliateRef);
+                    return;
+                } else {
+                    // User already tracked to another affiliate - keep original affiliate
+                    $originalAffiliate = Affiliate::with('user')->where('ref_code', $existingTrack->ref_code)->first();
+                    
+                    $welcomeText = "🎉 <b>Selamat datang kembali di EA Scalper Max Pro!</b>\n\n";
+                    if ($originalAffiliate) {
+                        $welcomeText .= "Anda terdaftar melalui referral dari <b>{$originalAffiliate->user->name}</b>\n\n";
+                    }
+                    $welcomeText .= "Silahkan pilih menu di bawah ini untuk melanjutkan:";
+
+                    $this->sendWelcomeMenu($chatId, $welcomeText, $existingTrack->ref_code);
+                    return;
+                }
             }
         }
 
