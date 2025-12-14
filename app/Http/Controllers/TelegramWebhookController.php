@@ -178,6 +178,10 @@ class TelegramWebhookController extends Controller
             }
 
             $telegramId = $user['id'];
+            $telegramUsername = $user['username'] ?? null;
+            $firstName = $user['first_name'] ?? '';
+            $lastName = $user['last_name'] ?? '';
+            $name = trim($firstName . ' ' . $lastName);
 
             // Ambil lead terakhir dari orang ini
             $lead = ReferralTrack::where('prospect_telegram_id', $telegramId)
@@ -187,10 +191,26 @@ class TelegramWebhookController extends Controller
             if (! $lead) {
                 Log::info('Join channel tanpa lead', [
                     'telegram_id' => $telegramId,
-                    'username' => $user['username'] ?? null,
-                    'first_name' => $user['first_name'] ?? null
+                    'username' => $telegramUsername,
+                    'first_name' => $firstName
                 ]);
                 return;
+            }
+
+            // UPDATE: Selalu update username & name jika belum ada
+            $updateData = [];
+            if (empty($lead->prospect_telegram_username) && $telegramUsername) {
+                $updateData['prospect_telegram_username'] = $telegramUsername;
+            }
+            if (empty($lead->prospect_name) && $name) {
+                $updateData['prospect_name'] = $name;
+            }
+            if (!empty($updateData)) {
+                $lead->update($updateData);
+                Log::info('Updated prospect info on join', [
+                    'telegram_id' => $telegramId,
+                    'updates' => $updateData
+                ]);
             }
 
             // Kalau sudah purchased / joined_channel jangan diutak-atik
