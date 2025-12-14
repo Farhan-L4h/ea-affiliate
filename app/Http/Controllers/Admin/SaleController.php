@@ -35,10 +35,10 @@ class SaleController extends Controller
 
         // Filter by date range
         if ($request->has('date_from') && $request->date_from !== '') {
-            $query->whereDate('sale_date', '>=', $request->date_from);
+            $query->where('sale_date', '>=', $request->date_from . ' 00:00:00');
         }
         if ($request->has('date_to') && $request->date_to !== '') {
-            $query->whereDate('sale_date', '<=', $request->date_to);
+            $query->where('sale_date', '<=', $request->date_to . ' 23:59:59');
         }
 
         $sales = $query->latest('sale_date')->paginate(20);

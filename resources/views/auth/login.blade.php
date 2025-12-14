@@ -49,7 +49,7 @@
         </div>
 
         <!-- Register Link -->
-        <div class="mt-4 text-center">
+        <div class="mt-4 text-start">
             <p class="text-sm text-gray-600">
                 Belum punya akun? 
                 <a href="{{ route('register') }}" class="font-semibold text-indigo-600 hover:text-indigo-800 underline">

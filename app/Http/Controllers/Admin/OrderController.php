@@ -36,10 +36,10 @@ class OrderController extends Controller
 
         // Filter by date range
         if ($request->has('date_from') && $request->date_from !== '') {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $query->where('created_at', '>=', $request->date_from . ' 00:00:00');
         }
         if ($request->has('date_to') && $request->date_to !== '') {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $query->where('created_at', '<=', $request->date_to . ' 23:59:59');
         }
 
         $orders = $query->latest()->paginate(20);
