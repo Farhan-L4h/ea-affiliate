@@ -414,7 +414,7 @@ class TelegramBotController extends Controller
         $message = "📺 <b>Cara Pasang EA Scalper Max Pro</b>\n\n";
         $message .= "Tonton video tutorial lengkap cara install dan setup EA:\n\n";
         $message .= "🔗 https://www.youtube.com/watch?v=iNbzsabpRoE\n\n";
-        $message .= "Jika ada kesulitan, hubungi admin @alwaysrighttt\n\n";
+        $message .= "Jika ada kesulitan, hubungi admin  @Desa_trading\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
 
         $this->telegram->sendMessage($chatId, $message);
@@ -424,7 +424,7 @@ class TelegramBotController extends Controller
     {
         $message = "💬 <b>Tanya Langsung</b>\n\n";
         $message .= "Silakan hubungi admin kami untuk konsultasi atau pertanyaan:\n\n";
-        $message .= "📱 Telegram: @alwaysrighttt\n\n";
+        $message .= "📱 Telegram:  @Desa_trading\n\n";
         $message .= "Admin siap membantu Anda!\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
 
@@ -433,7 +433,7 @@ class TelegramBotController extends Controller
 
     protected function handleFeatures(int $chatId): void
     {
-        $message = "✨ <b>Kenapa EA Ini Aman dan Bisa Profit Konsisten?</b>\n\n";
+        $message = "✨ <b>Kenapa EA Ini aman dan bisa profit konsisten ?</b>\n\n";
         $message .= "1️⃣ Menerapkan Sistem Low - Medium - High\n";
         $message .= "2️⃣ Sistem Grid Step dan Hedging Maksimum Layer\n";
         $message .= "3️⃣ Lock & Unlock Hedging SL+ BE\n";
@@ -441,9 +441,12 @@ class TelegramBotController extends Controller
         $message .= "5️⃣ Draw Down Kontrol\n";
         $message .= "6️⃣ News Filter\n";
         $message .= "7️⃣ Bulk Close (Khusus V2)\n";
-        $message .= "8️⃣ Potensial Profit Harian 2-10%\n";
-        $message .= "9️⃣ VIP Support Full Lifetime Update Sesuai Kondisi Pasar\n\n";
+        $message .= "8️⃣ Potensial Profit  Harian 2-10%\n";
+        $message .= "9️⃣ VIP Support full Lifetime Update sesuai kondisi pasar.\n\n";
         $message .= "💡 <i>EA dirancang untuk profit konsisten dengan risk management yang ketat!</i>\n\n";
+        $message .= "💰 <b>Harga Lifetime Normal 3.5jt</b>\n";
+        $message .= "📅 Mulai Hari Senin, 24 Nov 2025\n\n";
+        $message .= "📈 <i>Harga akan terus Naik seiring bertambahnya akurasi dan keamanan dari EA ini</i>\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
 
         $this->telegram->sendMessage($chatId, $message);
@@ -468,15 +471,30 @@ class TelegramBotController extends Controller
     protected function handleMoneyBack(int $chatId): void
     {
         $message = "🛡️ <b>Garansi 100% Jika MC Uang Kembali</b>\n\n";
-        $message .= "<b>*Syarat Ketentuan Berlaku:</b>\n";
+        $message .= "<b>*Syarat Ketentuan Berlaku</b>\n";
         $message .= "1️⃣ Garansi Berlaku untuk Full Version\n";
         $message .= "2️⃣ Memakai Set dan EA Update Terbaru\n";
-        $message .= "3️⃣ Garansi Berlaku Sampai Modal Beli Robot dan Modal Trading Kembali\n";
-        $message .= "4️⃣ Garansi Kembali untuk Uang Pembelian EA\n";
-        $message .= "5️⃣ Full Support Selamanya di Grup VIP Member\n";
-        $message .= "6️⃣ Modal Optimal 600$\n";
-        $message .= "7️⃣ Akses Akun dan VPS Kami yang Settingkan\n\n";
-        $message .= "💰 <i>Garansi ini menunjukkan kami serius dengan kualitas EA!</i>\n\n";
+        $message .= "3️⃣ Garansi Berlaku Sampai Modal Beli Robot Kembali 100%\n";
+        $message .= "4️⃣ Garansi Kembali untuk Uang Pembelian EA dan Modal\n";
+        $message .= "5️⃣ Full Support Selamanya di Grup VIP member\n";
+        $message .= "6️⃣ Modal wajib 1000$\n";
+        $message .= "7️⃣ Akses Akun dan VPS kami yang settingkan dan kelola\n";
+        $message .= "8️⃣ Tidak boleh tarik dana di akun (WD) selama masa Garansi Berlaku\n\n\n";
+        
+        $message .= "✨ <b>Kenapa EA Ini aman dan bisa profit konsisten ?</b>\n\n";
+        $message .= "1️⃣ Menerapkan Sistem Low - Medium - High\n";
+        $message .= "2️⃣ Sistem Grid Step dan Hedging Maksimum Layer\n";
+        $message .= "3️⃣ Lock & Unlock Hedging SL+ BE\n";
+        $message .= "4️⃣ TP SL Harian\n";
+        $message .= "5️⃣ Draw Down Kontrol\n";
+        $message .= "6️⃣ News Filter\n";
+        $message .= "7️⃣ Bulk Close (Khusus V2)\n";
+        $message .= "8️⃣ Potensial Profit  Harian 2-10%\n";
+        $message .= "9️⃣ VIP Support full Lifetime Update sesuai kondisi pasar.\n\n";
+        
+        $message .= "💰 <b>Harga Lifetime Normal 3.5jt</b>\n";
+        $message .= "📅 Mulai Hari Senin, 24 Nov 2025\n\n";
+        $message .= "📈 <i>Harga akan terus Naik seiring bertambahnya akurasi dan keamanan dari EA ini</i>\n\n";
         $message .= "Untuk kembali ke menu utama, ketik /start";
 
         $this->telegram->sendMessage($chatId, $message);

@@ -256,7 +256,7 @@ class MootaWebhookController extends Controller
         $message .= "Terima kasih atas pembelian Anda! 🎉\n\n";
         $message .= "📺 Tutorial Cara Pasang EA:\n";
         $message .= "🔗 https://www.youtube.com/watch?v=iNbzsabpRoE\n\n";
-        $message .= "Jika ada kesulitan, hubungi admin @alwaysrighttt\n\n";
+        $message .= "Jika ada kesulitan, hubungi admin @Desa_trading\n\n";
         $message .= "Selamat menggunakan EA Scalper Max Pro! 🚀";
 
         try {
