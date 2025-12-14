@@ -13,7 +13,7 @@ class AffiliatePayoutController extends Controller
     /**
      * Show payout dashboard for affiliate
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $affiliate = Affiliate::where('user_id', $user->id)->first();
@@ -22,13 +22,40 @@ class AffiliatePayoutController extends Controller
             return redirect()->route('dashboard')->with('error', 'Affiliate tidak ditemukan');
         }
 
-        // Get payout history
-        $payoutHistory = AffiliatePayout::where('affiliate_id', $affiliate->id)
-            ->where('request_type', 'manual')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Get filter parameters
+        $month = $request->get('month');
+        $year = $request->get('year');
 
-        return view('affiliate.payout.index', compact('affiliate', 'payoutHistory'));
+        // Get payout history with filters
+        $query = AffiliatePayout::where('affiliate_id', $affiliate->id)
+            ->where('request_type', 'manual')
+            ->orderBy('created_at', 'desc');
+
+        if ($month) {
+            $query->whereMonth('created_at', $month);
+        }
+
+        if ($year) {
+            $query->whereYear('created_at', $year);
+        }
+
+        $payoutHistory = $query->get();
+
+        // Calculate total withdrawn (paid status)
+        $totalWithdrawn = AffiliatePayout::where('affiliate_id', $affiliate->id)
+            ->where('request_type', 'manual')
+            ->where('status', 'paid')
+            ->sum('amount');
+
+        // Get available years for filter
+        $availableYears = AffiliatePayout::where('affiliate_id', $affiliate->id)
+            ->where('request_type', 'manual')
+            ->selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        return view('affiliate.payout.index', compact('affiliate', 'payoutHistory', 'totalWithdrawn', 'availableYears', 'month', 'year'));
     }
 
     /**
@@ -114,9 +141,9 @@ class AffiliatePayoutController extends Controller
             return back()->with('error', 'Harap lengkapi data bank terlebih dahulu');
         }
 
-        // Check if has enough balance
-        if ($affiliate->available_balance < $request->amount) {
-            return back()->with('error', 'Saldo tidak mencukupi');
+        // Check if has enough commission
+        if ($affiliate->total_commission < $request->amount) {
+            return back()->with('error', 'Total komisi tidak mencukupi');
         }
 
         // Check if there's pending request
@@ -139,11 +166,6 @@ class AffiliatePayoutController extends Controller
                 'status' => 'pending',
                 'request_type' => 'manual',
                 'requested_at' => now(),
-            ]);
-
-            // Update available balance (hold the amount)
-            $affiliate->update([
-                'available_balance' => $affiliate->available_balance - $request->amount,
             ]);
 
             DB::commit();
@@ -178,11 +200,6 @@ class AffiliatePayoutController extends Controller
 
         DB::beginTransaction();
         try {
-            // Return balance
-            $affiliate->update([
-                'available_balance' => $affiliate->available_balance + $payout->amount,
-            ]);
-
             // Delete request
             $payout->delete();
 

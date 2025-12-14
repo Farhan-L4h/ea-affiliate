@@ -37,26 +37,33 @@
             @endif
 
             {{-- Balance Info --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <div class="text-sm text-gray-500 mb-2">Total Komisi</div>
-                    <div class="text-2xl font-bold text-gray-800">
+                    <div class="text-sm text-gray-500 mb-2">
+                        <i class="fas fa-wallet mr-1"></i>
+                        Total Komisi (Dapat Dicairkan)
+                    </div>
+                    <div class="text-3xl font-bold text-green-600">
                         Rp {{ number_format($affiliate->total_commission, 0, ',', '.') }}
                     </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Komisi akan berkurang setelah pencairan dibayarkan
+                    </p>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <div class="text-sm text-gray-500 mb-2">Saldo Tersedia</div>
-                    <div class="text-2xl font-bold text-green-600">
-                        Rp {{ number_format($affiliate->available_balance, 0, ',', '.') }}
+                    <div class="text-sm text-gray-500 mb-2">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        Total Yang Sudah Ditarik
                     </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <div class="text-sm text-gray-500 mb-2">Total Ditarik</div>
-                    <div class="text-2xl font-bold text-blue-600">
-                        Rp {{ number_format($affiliate->withdrawn_balance, 0, ',', '.') }}
+                    <div class="text-3xl font-bold text-blue-600">
+                        Rp {{ number_format($totalWithdrawn, 0, ',', '.') }}
                     </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-history mr-1"></i>
+                        Total pencairan yang sudah dibayarkan
+                    </p>
                 </div>
             </div>
 
@@ -139,7 +146,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                                 <p class="mt-1 text-xs text-gray-500">
-                                    Saldo tersedia: Rp {{ number_format($affiliate->available_balance, 0, ',', '.') }}
+                                    Komisi tersedia: Rp {{ number_format($affiliate->total_commission, 0, ',', '.') }}
                                 </p>
                             </div>
 
@@ -150,14 +157,14 @@
                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                                     <span class="ml-2 text-sm text-gray-700">
                                         <i class="fas fa-wallet mr-1"></i>
-                                        Cairkan Semua Saldo (Rp {{ number_format($affiliate->available_balance, 0, ',', '.') }})
+                                        Cairkan Semua Komisi (Rp {{ number_format($affiliate->total_commission, 0, ',', '.') }})
                                     </span>
                                 </label>
                             </div>
 
                             <button type="submit" 
                                     class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 disabled:opacity-50"
-                                    {{ $affiliate->available_balance < 10000 ? 'disabled' : '' }}>
+                                    {{ $affiliate->total_commission < 10000 ? 'disabled' : '' }}>
                                 <i class="fas fa-paper-plane mr-2"></i>
                                 Ajukan Pencairan
                             </button>
@@ -169,7 +176,53 @@
             {{-- Payout History --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4">Riwayat Pencairan</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Riwayat Pencairan</h3>
+
+                        {{-- Filter Form --}}
+                        <form method="GET" action="{{ route('affiliate.payout.index') }}" class="flex gap-2">
+                            <select name="month" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <option value="">Semua Bulan</option>
+                                <option value="1" {{ request('month') == 1 ? 'selected' : '' }}>Januari</option>
+                                <option value="2" {{ request('month') == 2 ? 'selected' : '' }}>Februari</option>
+                                <option value="3" {{ request('month') == 3 ? 'selected' : '' }}>Maret</option>
+                                <option value="4" {{ request('month') == 4 ? 'selected' : '' }}>April</option>
+                                <option value="5" {{ request('month') == 5 ? 'selected' : '' }}>Mei</option>
+                                <option value="6" {{ request('month') == 6 ? 'selected' : '' }}>Juni</option>
+                                <option value="7" {{ request('month') == 7 ? 'selected' : '' }}>Juli</option>
+                                <option value="8" {{ request('month') == 8 ? 'selected' : '' }}>Agustus</option>
+                                <option value="9" {{ request('month') == 9 ? 'selected' : '' }}>September</option>
+                                <option value="10" {{ request('month') == 10 ? 'selected' : '' }}>Oktober</option>
+                                <option value="11" {{ request('month') == 11 ? 'selected' : '' }}>November</option>
+                                <option value="12" {{ request('month') == 12 ? 'selected' : '' }}>Desember</option>
+                            </select>
+
+                            <select name="year" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <option value="">Semua Tahun</option>
+                                @if($availableYears->count() > 0)
+                                    @foreach($availableYears as $availableYear)
+                                        <option value="{{ $availableYear }}" {{ request('year') == $availableYear ? 'selected' : '' }}>
+                                            {{ $availableYear }}
+                                        </option>
+                                    @endforeach
+                                @else
+                                    <option value="{{ date('Y') }}" {{ request('year') == date('Y') ? 'selected' : '' }}>{{ date('Y') }}</option>
+                                @endif
+                            </select>
+
+                            <button type="submit" class="inline-flex items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                                <i class="fas fa-filter mr-1"></i>
+                                Filter
+                            </button>
+
+                            @if(request('month') || request('year'))
+                                <a href="{{ route('affiliate.payout.index') }}" class="inline-flex items-center px-3 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400">
+                                    <i class="fas fa-times mr-1"></i>
+                                    Reset
+                                </a>
+                            @endif
+                        </form>
+                    </div>
 
                     @if($payoutHistory->count() > 0)
                         <div class="overflow-x-auto">
@@ -248,7 +301,7 @@
 
     {{-- JavaScript for Rupiah Formatter and Withdraw All --}}
     <script>
-        const availableBalance = {{ $affiliate->available_balance }};
+        const totalCommission = {{ $affiliate->total_commission }};
         const amountDisplay = document.getElementById('amount_display');
         const amountHidden = document.getElementById('amount');
         const withdrawAllCheckbox = document.getElementById('withdrawAll');
@@ -288,8 +341,8 @@
         // Withdraw all checkbox
         withdrawAllCheckbox.addEventListener('change', function() {
             if (this.checked) {
-                amountDisplay.value = formatRupiah(availableBalance.toString());
-                amountHidden.value = availableBalance;
+                amountDisplay.value = formatRupiah(totalCommission.toString());
+                amountHidden.value = totalCommission;
             } else {
                 amountDisplay.value = '';
                 amountHidden.value = '';
@@ -312,12 +365,12 @@
                 return false;
             }
             
-            if (amount > availableBalance) {
+            if (amount > totalCommission) {
                 e.preventDefault();
                 Swal.fire({
                     icon: 'error',
-                    title: 'Saldo Tidak Cukup',
-                    text: 'Jumlah melebihi saldo tersedia',
+                    title: 'Komisi Tidak Cukup',
+                    text: 'Jumlah melebihi total komisi tersedia',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#ef4444'
                 });

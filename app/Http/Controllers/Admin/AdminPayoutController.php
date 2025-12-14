@@ -109,12 +109,6 @@ class AdminPayoutController extends Controller
 
         DB::beginTransaction();
         try {
-            // Return balance to affiliate
-            $affiliate = $payout->affiliate;
-            $affiliate->update([
-                'available_balance' => $affiliate->available_balance + $payout->amount,
-            ]);
-
             $payout->update([
                 'status' => 'rejected',
                 'admin_note' => $request->admin_note,
@@ -148,10 +142,10 @@ class AdminPayoutController extends Controller
 
         DB::beginTransaction();
         try {
-            // Update withdrawn balance
+            // Reduce total commission
             $affiliate = $payout->affiliate;
             $affiliate->update([
-                'withdrawn_balance' => $affiliate->withdrawn_balance + $payout->amount,
+                'total_commission' => $affiliate->total_commission - $payout->amount,
             ]);
 
             $payout->update([
