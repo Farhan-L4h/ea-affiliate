@@ -145,7 +145,7 @@ class TelegramBotController extends Controller
                     ]);
 
                     $welcomeText = "🎉 <b>Selamat datang di EA Scalper Max Pro!</b>\n\n";
-                    $welcomeText .= "Anda datang melalui referral dari <b>{$affiliate->user->name}</b>\n\n";
+                    $welcomeText .= "Anda datang dari link affiliate <b>{$affiliate->user->name}</b>\n\n";
                     $welcomeText .= "Silahkan pilih menu di bawah ini untuk melanjutkan:";
 
                     $this->sendWelcomeMenu($chatId, $welcomeText, $affiliateRef);
@@ -156,7 +156,7 @@ class TelegramBotController extends Controller
                     
                     $welcomeText = "🎉 <b>Selamat datang kembali di EA Scalper Max Pro!</b>\n\n";
                     if ($originalAffiliate) {
-                        $welcomeText .= "Anda terdaftar melalui referral dari <b>{$originalAffiliate->user->name}</b>\n\n";
+                        $welcomeText .= "Anda terdaftar melalui link affiliate <b>{$originalAffiliate->user->name}</b>\n\n";
                     }
                     $welcomeText .= "Silahkan pilih menu di bawah ini untuk melanjutkan:";
 
@@ -173,7 +173,7 @@ class TelegramBotController extends Controller
             
             $welcomeText = "🎉 <b>Selamat datang kembali di EA Scalper Max Pro!</b>\n\n";
             if ($originalAffiliate) {
-                $welcomeText .= "Anda terdaftar melalui referral dari <b>{$originalAffiliate->user->name}</b>\n\n";
+                $welcomeText .= "Anda terdaftar melalui link affiliate <b>{$originalAffiliate->user->name}</b>\n\n";
             }
             $welcomeText .= "Silakan pilih menu di bawah ini:";
             
