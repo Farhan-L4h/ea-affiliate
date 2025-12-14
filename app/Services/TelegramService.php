@@ -89,4 +89,53 @@ class TelegramService
 
         Http::post("{$this->apiUrl}/editMessageText", $payload);
     }
+
+    /**
+     * Send document/file to chat
+     */
+    public function sendDocument(int|string $chatId, string $filePath, string $caption = ''): void
+    {
+        try {
+            $response = Http::attach(
+                'document',
+                file_get_contents($filePath),
+                basename($filePath)
+            )->post("{$this->apiUrl}/sendDocument", [
+                'chat_id' => $chatId,
+                'caption' => $caption,
+                'parse_mode' => 'HTML',
+            ]);
+
+            if (!$response->successful()) {
+                \Log::error('Failed to send document', [
+                    'file' => basename($filePath),
+                    'response' => $response->json(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error sending document', [
+                'file' => basename($filePath),
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Send multiple documents to chat
+     */
+    public function sendDocuments(int|string $chatId, array $filePaths, string $caption = ''): void
+    {
+        foreach ($filePaths as $index => $filePath) {
+            if (file_exists($filePath)) {
+                // Send caption only with first file
+                $fileCaption = ($index === 0) ? $caption : '';
+                $this->sendDocument($chatId, $filePath, $fileCaption);
+                
+                // Small delay to avoid rate limiting
+                usleep(300000); // 0.3 seconds
+            } else {
+                \Log::warning('File not found for sending', ['file' => $filePath]);
+            }
+        }
+    }
 }

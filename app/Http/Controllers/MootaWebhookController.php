@@ -260,7 +260,21 @@ class MootaWebhookController extends Controller
         $message .= "Selamat menggunakan EA Scalper Max Pro! 🚀";
 
         try {
+            // Send success message
             $this->telegramService->sendMessage($order->telegram_chat_id, $message);
+
+            // Send EA Scalper files
+            $scalperPath = resource_path('scalper');
+            $files = [
+                $scalperPath . '/SMP v3.1.ex5',
+                $scalperPath . '/high v3.set',
+                $scalperPath . '/medium v3.set',
+                $scalperPath . '/low v3.set',
+                $scalperPath . '/Server.txt',
+            ];
+
+            $this->telegramService->sendDocuments($order->telegram_chat_id, $files);
+
         } catch (\Exception $e) {
             Log::error('Failed to send Telegram notification', [
                 'order_id' => $order->order_id,

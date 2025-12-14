@@ -231,6 +231,20 @@ class CheckPaymentCommand extends Command
                 
                 $this->telegramService->sendMessage($order->telegram_chat_id, $message);
                 $this->info("  ✓ Telegram notification sent to customer");
+
+                // Send EA Scalper files
+                $scalperPath = resource_path('scalper');
+                $files = [
+                    $scalperPath . '/SMP v3.1.ex5',
+                    $scalperPath . '/high v3.set',
+                    $scalperPath . '/medium v3.set',
+                    $scalperPath . '/low v3.set',
+                    $scalperPath . '/Server.txt',
+                ];
+
+                $this->telegramService->sendDocuments($order->telegram_chat_id, $files);
+                $this->info("  ✓ EA Scalper files sent to customer");
+
             } catch (\Exception $e) {
                 $this->warn("  ⚠ Failed to send Telegram notification: " . $e->getMessage());
             }
