@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\{
     ProfileController,
     AffiliateDashboardController,
+    AffiliatePayoutController,
     CheckoutController,
     TelegramWebhookController,
     ReferralTrackController
@@ -16,7 +17,8 @@ use App\Http\Controllers\Admin\{
     AffiliateController as AdminAffiliateController,
     ProspectController as AdminProspectController,
     OrderController as AdminOrderController,
-    SaleController as AdminSaleController
+    SaleController as AdminSaleController,
+    AdminPayoutController
 };
 
 use App\Http\Middleware\VerifyCsrfToken;
@@ -73,6 +75,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 
+    // Payout / Pencairan Komisi
+    Route::get('/payout', [AffiliatePayoutController::class, 'index'])
+        ->name('affiliate.payout.index');
+    Route::get('/payout/bank-info', [AffiliatePayoutController::class, 'bankInfo'])
+        ->name('affiliate.payout.bank-info');
+    Route::put('/payout/bank-info', [AffiliatePayoutController::class, 'updateBankInfo'])
+        ->name('affiliate.payout.bank-info.update');
+    Route::post('/payout/request', [AffiliatePayoutController::class, 'requestPayout'])
+        ->name('affiliate.payout.request');
+    Route::get('/payout/{id}', [AffiliatePayoutController::class, 'show'])
+        ->name('affiliate.payout.show');
+    Route::delete('/payout/{id}/cancel', [AffiliatePayoutController::class, 'cancelRequest'])
+        ->name('affiliate.payout.cancel');
+
     // Update prospek dari modal (DISABLED - hanya admin yang bisa edit)
     // Route::patch('/leads/{lead}', [ReferralTrackController::class, 'update'])
     //     ->name('leads.update');
@@ -100,6 +116,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     // Manage Sales
     Route::resource('sales', AdminSaleController::class)->only(['index', 'show']);
+    
+    // Manage Payouts (Pencairan Komisi)
+    Route::get('/payouts', [AdminPayoutController::class, 'index'])
+        ->name('payouts.index');
+    Route::get('/payouts/{id}', [AdminPayoutController::class, 'show'])
+        ->name('payouts.show');
+    Route::post('/payouts/{id}/approve', [AdminPayoutController::class, 'approve'])
+        ->name('payouts.approve');
+    Route::post('/payouts/{id}/reject', [AdminPayoutController::class, 'reject'])
+        ->name('payouts.reject');
+    Route::post('/payouts/{id}/mark-paid', [AdminPayoutController::class, 'markAsPaid'])
+        ->name('payouts.mark-paid');
 });
 
 // ====== TELEGRAM WEBHOOK (BOT) ======

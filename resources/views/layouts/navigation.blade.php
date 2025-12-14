@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('affiliate.prospects')" :active="request()->routeIs('affiliate.prospects')">
                         {{ __('Data Prospek') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('affiliate.payout.index')" :active="request()->routeIs('affiliate.payout.*')">
+                        {{ __('Pencairan Komisi') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -75,6 +78,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('affiliate.prospects')" :active="request()->routeIs('affiliate.prospects')">
                 {{ __('Data Prospek') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('affiliate.payout.index')" :active="request()->routeIs('affiliate.payout.*')">
+                {{ __('Pencairan Komisi') }}
             </x-responsive-nav-link>
         </div>
 

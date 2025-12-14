@@ -69,6 +69,11 @@
                     Sales
                 </a>
 
+                <a href="{{ route('admin.payouts.index') }}" class="flex items-center px-6 py-3 hover:bg-gray-700 {{ request()->routeIs('admin.payouts.*') ? 'bg-gray-700 border-l-4 border-blue-500' : '' }}">
+                    <i class="fas fa-hand-holding-usd w-5 mr-3"></i>
+                    Pencairan Komisi
+                </a>
+
                 <div class="border-t border-gray-700 my-4"></div>
 
                 {{-- <a href="{{ route('dashboard') }}" class="flex items-center px-6 py-3 hover:bg-gray-700">
