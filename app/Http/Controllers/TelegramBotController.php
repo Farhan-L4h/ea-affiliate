@@ -123,18 +123,18 @@ class TelegramBotController extends Controller
      */
     protected function handleStartCommand(int $chatId, string $text, ?string $username): void
     {
-        // Check if referral code exists
+        // Check if referral code exists in command
         $parts = explode(' ', $text);
         $affiliateRef = $parts[1] ?? null;
+
+        // First, check if user already has a referral record (first click wins)
+        $existingTrack = ReferralTrack::where('prospect_telegram_id', (string)$chatId)->first();
 
         if ($affiliateRef) {
             // Validate affiliate code
             $affiliate = Affiliate::with('user')->where('ref_code', $affiliateRef)->first();
 
             if ($affiliate) {
-                // Check if user already has a referral record
-                $existingTrack = ReferralTrack::where('prospect_telegram_id', (string)$chatId)->first();
-
                 if (!$existingTrack) {
                     // First click wins - create new record
                     ReferralTrack::create([
@@ -166,7 +166,22 @@ class TelegramBotController extends Controller
             }
         }
 
-        // Default welcome
+        // User typed /start without ref code
+        // Check if user already has a referral record from previous click
+        if ($existingTrack) {
+            $originalAffiliate = Affiliate::with('user')->where('ref_code', $existingTrack->ref_code)->first();
+            
+            $welcomeText = "🎉 <b>Selamat datang kembali di EA Scalper Max Pro!</b>\n\n";
+            if ($originalAffiliate) {
+                $welcomeText .= "Anda terdaftar melalui referral dari <b>{$originalAffiliate->user->name}</b>\n\n";
+            }
+            $welcomeText .= "Silakan pilih menu di bawah ini:";
+            
+            $this->sendWelcomeMenu($chatId, $welcomeText, $existingTrack->ref_code);
+            return;
+        }
+
+        // Default welcome - no ref code and no existing track
         $welcomeText = "🎉 <b>Selamat datang di EA Scalper Max Pro!</b>\n\n";
         $welcomeText .= "Silakan pilih menu di bawah ini:";
         
