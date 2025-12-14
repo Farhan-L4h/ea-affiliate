@@ -12,24 +12,37 @@ class TelegramWebhookController extends Controller
 {
     public function handle(Request $request)
     {
-        $update = $request->all();
-        Log::info('Telegram update', $update);
+        try {
+            $update = $request->all();
+            Log::info('Telegram update received', ['update' => $update]);
 
-        // Pesan biasa: /start AFRATFYI
-        if (isset($update['message'])) {
-            $this->handleMessage($update['message']);
+            // Pesan biasa: /start AFRATFYI
+            if (isset($update['message'])) {
+                $this->handleMessage($update['message']);
+            }
+
+            // Perubahan member di grup / channel
+            if (isset($update['chat_member'])) {
+                $this->handleChatMember($update['chat_member']);
+            }
+
+            if (isset($update['my_chat_member'])) {
+                $this->handleChatMember($update['my_chat_member']);
+            }
+
+            return response()->json(['ok' => true]);
+            
+        } catch (\Exception $e) {
+            Log::error('Telegram webhook error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Still return 200 to prevent Telegram from retrying
+            return response()->json(['ok' => false, 'error' => $e->getMessage()], 200);
         }
-
-        // Perubahan member di grup / channel
-        if (isset($update['chat_member'])) {
-            $this->handleChatMember($update['chat_member']);
-        }
-
-        if (isset($update['my_chat_member'])) {
-            $this->handleChatMember($update['my_chat_member']);
-        }
-
-        return response()->json(['ok' => true]);
     }
 
     /**
@@ -133,47 +146,89 @@ class TelegramWebhookController extends Controller
      */
     protected function handleChatMember(array $chatMember): void
     {
-        $chat = $chatMember['chat'] ?? null;
-        $new  = $chatMember['new_chat_member'] ?? null;
+        try {
+            $chat = $chatMember['chat'] ?? null;
+            $new  = $chatMember['new_chat_member'] ?? null;
 
-        if (! $chat || ! $new) {
-            return;
-        }
+            if (! $chat || ! $new) {
+                Log::debug('Chat member update incomplete', ['chat_member' => $chatMember]);
+                return;
+            }
 
-        // Hanya track untuk channel/grup target kita
-        $targetGroupId = (int) config('services.telegram.group_id');
-        if ((int) ($chat['id'] ?? 0) !== $targetGroupId) {
-            return;
-        }
+            // Hanya track untuk channel/grup target kita
+            $targetGroupId = (int) config('services.telegram.group_id');
+            if ((int) ($chat['id'] ?? 0) !== $targetGroupId) {
+                Log::debug('Chat member update for different group', [
+                    'received_id' => $chat['id'] ?? 0,
+                    'target_id' => $targetGroupId
+                ]);
+                return;
+            }
 
-        $user   = $new['user'] ?? null;
-        $status = $new['status'] ?? null;
+            $user   = $new['user'] ?? null;
+            $status = $new['status'] ?? null;
 
-        // Status harus member / admin / owner
-        if (! $user || ! in_array($status, ['member', 'administrator', 'creator'], true)) {
-            return;
-        }
+            // Status harus member / admin / owner
+            if (! $user || ! in_array($status, ['member', 'administrator', 'creator'], true)) {
+                Log::debug('Chat member status not tracked', [
+                    'status' => $status,
+                    'user_id' => $user['id'] ?? null
+                ]);
+                return;
+            }
 
-        $telegramId = $user['id'];
+            $telegramId = $user['id'];
 
-        // Ambil lead terakhir dari orang ini
-        $lead = ReferralTrack::where('prospect_telegram_id', $telegramId)
-            ->latest()
-            ->first();
+            // Ambil lead terakhir dari orang ini
+            $lead = ReferralTrack::where('prospect_telegram_id', $telegramId)
+                ->latest()
+                ->first();
 
-        if (! $lead) {
-            Log::info('Join channel tanpa lead', ['telegram_id' => $telegramId]);
-            return;
-        }
+            if (! $lead) {
+                Log::info('Join channel tanpa lead', [
+                    'telegram_id' => $telegramId,
+                    'username' => $user['username'] ?? null,
+                    'first_name' => $user['first_name'] ?? null
+                ]);
+                return;
+            }
 
-        // Kalau sudah purchased / joined_channel jangan diutak-atik
-        if (! in_array($lead->status, ['joined_channel', 'purchased'], true)) {
-            $lead->update([
-                'status' => 'joined_channel',
+            // Kalau sudah purchased / joined_channel jangan diutak-atik
+            if (! in_array($lead->status, ['joined_channel', 'purchased'], true)) {
+                $lead->update([
+                    'status' => 'joined_channel',
+                ]);
+
+                Log::info('Status updated to joined_channel', [
+                    'telegram_id' => $telegramId,
+                    'prospect_username' => $lead->prospect_telegram_username,
+                    'ref_code' => $lead->ref_code
+                ]);
+
+                // Tambah total join sekali aja per lead
+                try {
+                    Affiliate::where('ref_code', $lead->ref_code)->increment('total_joins');
+                } catch (\Exception $e) {
+                    Log::warning('Failed to increment total_joins', [
+                        'ref_code' => $lead->ref_code,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            } else {
+                Log::debug('Lead status already advanced', [
+                    'telegram_id' => $telegramId,
+                    'current_status' => $lead->status
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Error in handleChatMember', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'chat_member' => $chatMember
             ]);
-
-            // Tambah total join sekali aja per lead
-            Affiliate::where('ref_code', $lead->ref_code)->increment('total_joins');
+            throw $e;
         }
     }
 }
