@@ -107,8 +107,18 @@ class CheckPaymentCommand extends Command
         foreach ($mutations as $mutation) {
             $amount = (float) ($mutation['amount'] ?? 0);
             
+            // Must match exact amount
             if ($amount == $order->total_amount) {
                 $this->info("  ✓ Amount matched: Rp " . number_format($amount, 0, ',', '.'));
+                
+                // Additional info about how it was matched
+                $description = $mutation['description'] ?? '';
+                $note = $mutation['note'] ?? '';
+                if (str_contains(strtoupper($description), $order->order_id) || str_contains(strtoupper($note), $order->order_id)) {
+                    $this->info("  ✓ Matched by: Order ID in description/note");
+                } else {
+                    $this->info("  ✓ Matched by: Unique amount (Rp " . number_format($amount, 0, ',', '.') . ")");
+                }
                 
                 // Process payment
                 $this->processPayment($order);
@@ -119,12 +129,14 @@ class CheckPaymentCommand extends Command
                 $this->warn("  ⚠ Amount mismatch - Expected: {$order->total_amount}, Got: {$amount}");
             }
         }
+
+        $this->warn("  ⚠ Mutations found but none matched the exact amount");
     }
 
     protected function getMutationsForOrder(Order $order): array
     {
         try {
-            // Search by description/note containing order ID
+            // Search by description/note containing order ID OR by exact amount match
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Authorization' => 'Bearer ' . config('services.moota.token'),
                 'Accept' => 'application/json',
@@ -139,19 +151,26 @@ class CheckPaymentCommand extends Command
 
             $allMutations = $response->json('data', []);
             
-            // Filter mutations containing order ID
+            // Filter mutations by Order ID OR exact amount
             $matchingMutations = [];
             foreach ($allMutations as $mutation) {
+                $mutationAmount = (float) ($mutation['amount'] ?? 0);
                 $description = strtoupper($mutation['description'] ?? '');
                 $note = strtoupper($mutation['note'] ?? '');
                 
-                // Check description and note
+                // Method 1: Check if Order ID exists in description or note
                 if (str_contains($description, $order->order_id) || str_contains($note, $order->order_id)) {
                     $matchingMutations[] = $mutation;
                     continue;
                 }
                 
-                // Check items array (untuk Moota Sandbox)
+                // Method 2: Match by exact amount (including unique code)
+                if ($mutationAmount == $order->total_amount) {
+                    $matchingMutations[] = $mutation;
+                    continue;
+                }
+                
+                // Method 3: Check items array (untuk Moota Sandbox)
                 $items = $mutation['items'] ?? [];
                 if (is_array($items)) {
                     foreach ($items as $item) {
