@@ -35,11 +35,20 @@ class SetupTelegramWebhook extends Command
 
         $this->info('Setting webhook to: ' . $webhookUrl);
 
-        $result = $telegram->setWebhook($webhookUrl);
+        // Tambahkan allowed_updates untuk menerima chat_member updates
+        $allowedUpdates = ['message', 'callback_query', 'chat_member', 'my_chat_member'];
+        $this->info('Allowed updates: ' . implode(', ', $allowedUpdates));
+
+        $result = $telegram->setWebhook($webhookUrl, $allowedUpdates);
 
         if ($result['ok'] ?? false) {
             $this->info('✅ Webhook successfully set!');
             $this->info('Description: ' . ($result['description'] ?? 'N/A'));
+            
+            $this->newLine();
+            $this->warn('⚠️  PENTING: Pastikan bot sudah menjadi ADMIN di channel/grup!');
+            $this->warn('Channel ID: ' . config('services.telegram.group_id'));
+            
             return 0;
         } else {
             $this->error('❌ Failed to set webhook');

@@ -15,11 +15,15 @@ class TelegramService
         $this->apiUrl = "https://api.telegram.org/bot{$this->token}";
     }
 
-    public function setWebhook(string $url): array
+    public function setWebhook(string $url, array $allowedUpdates = []): array
     {
-        $res = Http::post("{$this->apiUrl}/setWebhook", [
-            'url' => $url,
-        ]);
+        $params = ['url' => $url];
+        
+        if (!empty($allowedUpdates)) {
+            $params['allowed_updates'] = json_encode($allowedUpdates);
+        }
+        
+        $res = Http::post("{$this->apiUrl}/setWebhook", $params);
 
         return $res->json();
     }
