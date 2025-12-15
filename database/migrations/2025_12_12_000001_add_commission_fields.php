@@ -14,7 +14,7 @@ return new class extends Migration
         // Add commission_rate to affiliates table
         if (Schema::hasTable('affiliates') && !Schema::hasColumn('affiliates', 'commission_rate')) {
             Schema::table('affiliates', function (Blueprint $table) {
-                $table->decimal('commission_rate', 5, 2)->default(20.00)->after('total_sales'); // Default 20%
+                $table->decimal('commission_rate', 5, 2)->default(30.00)->after('total_sales'); // Default 30%
                 $table->decimal('total_commission', 15, 2)->default(0)->after('commission_rate');
             });
         }

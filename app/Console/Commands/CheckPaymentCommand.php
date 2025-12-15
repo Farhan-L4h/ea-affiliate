@@ -206,7 +206,7 @@ class CheckPaymentCommand extends Command
         }
 
         // Calculate commission
-        $commissionRate = $affiliate ? ($affiliate->commission_rate ?? 20) : 0;
+        $commissionRate = $affiliate ? ($affiliate->commission_rate ?? 30) : 0;
         $commissionAmount = ($order->base_amount * $commissionRate) / 100;
 
         // Create sale record
